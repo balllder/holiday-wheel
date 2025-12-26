@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel of Fortune</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Holiday Wheel of Fortune</h1>
+    <p class="sub">Spin • Guess • Solve</p>
+  </header>
+
+  <main class="grid">
+    <!-- PUZZLE -->
+    <section class="card">
+      <h2>Puzzle</h2>
+      <div id="category" class="muted"></div>
+
+      <div id="boardWrap" class="boardWrap">
+        <div id="countdownBadge" class="countdownBadge hidden"></div>
+        <div id="board" class="board"></div>
+      </div>
+
+      <div class="row">
+        <input id="letterInput" maxlength="1" placeholder="Letter" />
+        <button id="guessBtn">Guess</button>
+        <input id="solveInput" placeholder="Solve…" />
+        <button id="solveBtn">Solve</button>
+      </div>
+
+      <div id="usedLetters" class="muted small"></div>
+      <div id="status" class="muted small"></div>
+    </section>
+
+    <!-- WHEEL -->
+    <section class="card">
+      <h2>Wheel</h2>
+      <div class="wheelWrap">
+        <canvas id="wheel" width="360" height="360"></canvas>
+        <div class="pointer"></div>
+      </div>
+
+      <div class="row">
+        <button id="spinBtn">Spin</button>
+        <button id="nextBtn" class="secondary">Next</button>
+        <button id="newBtn" class="secondary">New Puzzle</button>
+      </div>
+
+      <div class="score">
+        <div>Wedge: <span id="wedgeValue">—</span></div>
+        <div>Round: $<span id="roundScore">0</span></div>
+        <div>Final: <span id="timerText">—</span></div>
+      </div>
+
+      <div class="row">
+        <button id="startTimerBtn" class="secondary">Start 30s</button>
+        <button id="stopTimerBtn" class="secondary">Stop</button>
+      </div>
+    </section>
+
+    <!-- PLAYERS -->
+    <section class="card wide">
+      <h2>Players</h2>
+      <div class="row">
+        <input id="playersInput" placeholder="Alice, Bob, Carol…" />
+        <button id="setPlayersBtn" class="secondary">Set Players</button>
+      </div>
+      <div id="players" class="players"></div>
+    </section>
+
+    <!-- GAME / RULES -->
+    <section class="card wide">
+      <div class="tabs">
+        <button id="tabGameBtn" class="tab active">Game</button>
+        <button id="tabRulesBtn" class="tab">Rules</button>
+      </div>
+
+      <div id="tabGame" class="tabPanel">
+        <label class="toggle">
+          <input type="checkbox" id="winnerStartsToggle" checked />
+          Winner starts next puzzle
+        </label>
+
+        <label class="toggle">
+          <input type="checkbox" id="soundsToggle" checked />
+          Sounds
+        </label>
+
+        <label class="toggle">
+          <input type="checkbox" id="flashToggle" checked />
+          Flash at 0
+        </label>
+      </div>
+
+      <div id="tabRules" class="tabPanel" style="display:none;">
+        <h3>House Rules</h3>
+        <textarea id="houseRulesInput" rows="6"></textarea>
+        <div class="row">
+          <button id="saveHouseRulesBtn" class="secondary">Save</button>
+          <button id="shareHouseRulesBtn" class="secondary">Copy</button>
+          <button id="clearHouseRulesBtn" class="secondary">Clear</button>
+        </div>
+        <div id="houseRulesDisplay" class="houseRulesDisplay muted small"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot muted small">Holiday Game Night 🎉</footer>
+  <script src="app.js"></script>
+</body>
+</html>
