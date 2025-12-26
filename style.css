@@ -1,0 +1,60 @@
+:root{
+  --bg:#0b1020;
+  --text:#e9eeff;
+  --muted:#aab4e6;
+  --accent:#7aa2ff;
+  --danger:#ff6b6b;
+  --border:rgba(255,255,255,.15);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(1200px 600px at 20% 0%, #19265a 0%, var(--bg) 55%);
+  color:var(--text);
+}
+
+.top{text-align:center;padding:20px}
+.grid{max-width:1100px;margin:auto;padding:16px;display:grid;gap:16px;grid-template-columns:1fr 1fr}
+.card{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:16px;padding:16px}
+.card.wide{grid-column:1/-1}
+
+.row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+button{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(122,162,255,.2);color:var(--text)}
+button.secondary{background:rgba(255,255,255,.06)}
+
+input,textarea{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text)}
+
+.boardWrap{position:relative}
+.board{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:1px dashed var(--border);border-radius:14px}
+
+.tile{width:34px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);font-weight:800}
+.tile.hidden{opacity:.25}
+.tile.space{border:none;width:14px}
+
+.countdownBadge{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-size:40px;font-weight:900;
+  padding:20px 28px;
+  background:rgba(0,0,0,.7);
+  border-radius:999px;
+  border:2px solid var(--border);
+}
+.hidden{display:none}
+
+.players{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.player{padding:10px;border:1px solid var(--border);border-radius:12px}
+.player.active{outline:2px solid var(--accent)}
+
+.tabs{display:flex;gap:10px}
+.tab{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.06)}
+.tab.active{outline:2px solid var(--accent)}
+
+.houseRulesDisplay{margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:12px}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .players{grid-template-columns:1fr 1fr}
+}
