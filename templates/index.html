@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel of Fortune</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=7" />
+</head>
+<body>
+  <header class="top">
+    <h1>Holiday Wheel of Fortune</h1>
+    <div class="topMeta">
+      <div class="muted small">Room: <b id="roomLabel"></b> • <span id="packCount">—</span></div>
+      <div class="connPill">
+        <span id="connDot" class="connDot off"></span>
+        <span id="connText" class="muted small">Disconnected</span>
+      </div>
+    </div>
+    <div id="hostBanner" class="hostBanner hidden">HOST MODE ACTIVE</div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="between">
+        <h2 style="margin:0;">Puzzle</h2>
+        <div class="pill" id="phasePill">—</div>
+      </div>
+
+      <div class="between" style="margin-top:6px;">
+        <div id="category" class="muted"></div>
+        <div id="finalCountdownWrap" class="finalCountdownWrap hidden">
+          <span class="finalCountdownLabel">FINAL</span>
+          <span id="finalCountdown" class="finalCountdown">—</span>
+        </div>
+      </div>
+
+      <div class="boardWrap">
+        <div id="vannaBoard" class="vannaBoard"></div>
+      </div>
+
+      <div id="finalPicker" class="finalPicker hidden">
+        <div class="muted small" id="finalPickerTitle">
+          Final picks: choose 3 consonants and 1 vowel
+        </div>
+
+        <div class="finalPickRow">
+          <div class="finalPickBox">
+            <div class="muted small">Consonants</div>
+            <div id="finalConsonants" class="finalPickChips">—</div>
+          </div>
+          <div class="finalPickBox">
+            <div class="muted small">Vowel</div>
+            <div id="finalVowel" class="finalPickChips">—</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <input id="finalPickInput" maxlength="1" placeholder="Pick letter" />
+          <button id="finalPickConBtn" type="button">Pick consonant</button>
+          <button id="finalPickVowelBtn" class="secondary" type="button">Pick vowel</button>
+        </div>
+
+        <div class="muted small" id="finalPickHint"></div>
+      </div>
+
+      <div class="row" id="normalGuessRow">
+        <input id="letterInput" maxlength="1" placeholder="Letter" />
+        <button id="guessBtn" type="button">Guess</button>
+
+        <select id="vowelSelect" class="select">
+          <option value="">Buy vowel…</option>
+          <option>A</option><option>E</option><option>I</option><option>O</option><option>U</option>
+        </select>
+        <button id="buyVowelBtn" class="secondary" type="button">Buy Vowel</button>
+      </div>
+
+      <div class="row">
+        <input id="solveInput" placeholder="Solve…" style="flex:1; min-width:220px;" />
+        <button id="solveBtn" type="button">Solve</button>
+        <button id="buzzBtn" class="secondary" type="button">BUZZ</button>
+      </div>
+
+      <div class="muted small" id="usedLetters"></div>
+      <div class="muted small" id="status"></div>
+    </section>
+
+    <section class="card">
+      <div class="between">
+        <h2 style="margin:0;">Wheel</h2>
+        <button id="hostBtn" class="secondary" type="button">Host Mode</button>
+      </div>
+
+      <div class="wheelWrap">
+        <canvas id="wheel" width="360" height="360"></canvas>
+        <div class="pointer"></div>
+      </div>
+
+      <div class="row">
+        <button id="spinBtn" type="button">Spin</button>
+      </div>
+
+      <div class="score">
+        <div><span class="label">Wedge:</span> <span id="wedgeValue">—</span></div>
+        <div><span class="label">Active Round:</span> $<span id="roundScore">0</span> <span id="prizeMini"></span></div>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <div class="between">
+        <h2 style="margin:0;">Players</h2>
+        <div class="muted small" id="hostStatus">Host: —</div>
+      </div>
+
+      <div class="row">
+        <input id="myName" placeholder="Your name (for claiming)" style="flex:1; min-width:200px;" />
+        <button id="releasePlayerBtn" class="secondary" type="button">Release Slot</button>
+      </div>
+
+      <div class="players" id="players"></div>
+
+      <details style="margin-top:12px;">
+        <summary class="muted">Host admin</summary>
+
+        <div class="row" style="margin-top:10px;">
+          <button id="newGameBtn" class="secondary hostOnly" type="button">New Game</button>
+          <button id="newPuzzleBtn" class="secondary hostOnly" type="button">New Puzzle</button>
+
+          <button id="startTossupBtn" class="secondary hostOnly" type="button">Start Toss-Up</button>
+          <button id="endTossupBtn" class="secondary hostOnly" type="button">End Toss-Up</button>
+
+          <button id="startFinalBtn" class="secondary hostOnly" type="button">Start Final Round</button>
+          <button id="endFinalBtn" class="secondary hostOnly" type="button">End Final Round</button>
+
+          <button id="setPlayersBtn" class="secondary hostOnly" type="button">Set Players</button>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div class="muted small">Set current player:</div>
+          <select id="hostSetActiveSelect" class="select">
+            <option value="">Choose player…</option>
+          </select>
+          <button id="hostSetActiveBtn" class="secondary hostOnly" type="button">Set Active</button>
+        </div>
+
+        <div class="row">
+          <input id="playersInput" placeholder="Names comma-separated (creates exactly that many players)" style="flex:1; min-width:260px;" />
+        </div>
+
+        <details style="margin-top:10px;">
+          <summary class="muted">Puzzle packs (host)</summary>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="muted small">Active pack for this room:</div>
+            <select id="packSelect" class="select hostOnly">
+              <option value="">All Packs</option>
+            </select>
+            <button id="refreshPacksBtn" class="secondary hostOnly" type="button">Refresh</button>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <input id="packNameInput" placeholder="Pack name (e.g., EASTER 2026)" style="flex:1; min-width:240px;" />
+          </div>
+
+          <div class="muted small" style="margin-top:6px;">Paste lines: <b>Category | Answer</b></div>
+          <textarea id="packText" rows="7" style="width:100%; margin-top:10px;"></textarea>
+          <div class="row">
+            <button id="loadPackBtn" class="secondary hostOnly" type="button">Save Pack to DB</button>
+          </div>
+        
+          <div class="row" style="margin-top:10px;">
+            <input id="packFile" type="file" accept="application/json" class="hostOnly" />
+            <button id="importPackBtn" class="secondary hostOnly" type="button">Import JSON File</button>
+          </div>
+          <div class="muted small">JSON format: {"packs":[{"name":"...","puzzles":[{"category":"...","answer":"..."}]}]}</div>   
+        </details>
+
+        <details style="margin-top:10px;">
+          <summary class="muted">Prize names (host) — one per remaining PRIZE wedge</summary>
+          <textarea id="prizeNamesText" rows="4" style="width:100%; margin-top:10px;"></textarea>
+          <div class="row">
+            <button id="setPrizeNamesBtn" class="secondary hostOnly" type="button">Update Prize Names</button>
+          </div>
+        </details>
+
+        <details style="margin-top:10px;">
+          <summary class="muted">Config (host) — saved per room in DB</summary>
+
+          <div class="row" style="margin-top:10px;">
+            <div style="flex:1; min-width:160px;">
+              <div class="muted small">Vowel cost ($)</div>
+              <input id="cfgVowelCost" type="number" min="0" step="50" />
+            </div>
+
+            <div style="flex:1; min-width:160px;">
+              <div class="muted small">Final seconds</div>
+              <input id="cfgFinalSeconds" type="number" min="5" step="1" />
+            </div>
+
+            <div style="flex:1; min-width:160px;">
+              <div class="muted small">Final jackpot ($)</div>
+              <input id="cfgFinalJackpot" type="number" min="0" step="500" />
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="muted small">Prize replacement cash list (comma-separated)</div>
+            <input id="cfgPrizeCashList" placeholder="500,1000,1500,2000,2500,3000,3500" style="width:100%;" />
+          </div>
+
+          <div class="row">
+            <button id="saveConfigBtn" class="secondary hostOnly" type="button">Save Config</button>
+            <button id="reloadConfigBtn" class="secondary hostOnly" type="button">Reload From DB</button>
+            <span class="muted small" id="cfgSavedAt"></span>
+          </div>
+        </details>
+
+      </details>
+    </section>
+  </main>
+
+  <div class="modal" id="hostModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modalCard" id="hostModalCard">
+      <div class="between">
+        <h3 style="margin:0;">Host Mode</h3>
+        <button class="secondary" id="closeHostModal" type="button">Close</button>
+      </div>
+      <p class="muted small" style="margin-top:10px;">
+        Host mode is for admin controls (new game, config, puzzle packs, etc.).
+      </p>
+      <div class="row">
+        <input id="hostCode" placeholder="Host code (default: holiday)" />
+        <button id="claimHostBtn" type="button">Claim Host</button>
+        <button id="releaseHostBtn" class="secondary" type="button">Release</button>
+      </div>
+    </div>
+  </div>
+
+  <script>window.__ROOM__ = "{{ room }}";</script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=7"></script>
+</body>
+</html>

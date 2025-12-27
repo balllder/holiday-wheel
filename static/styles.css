@@ -1,0 +1,229 @@
+:root{
+  --bg:#0b1020;
+  --card:#121a33;
+  --text:#e8eeff;
+  --muted:rgba(232,238,255,.72);
+  --line:rgba(255,255,255,.10);
+  --btn:#2b5cff;
+  --btn2:#2b355a;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:radial-gradient(900px 420px at 30% 0%, #1b2a6b 0%, transparent 60%), var(--bg);
+  color:var(--text);
+}
+
+.top{padding:18px 16px; border-bottom:1px solid var(--line)}
+h1{margin:0 0 8px 0; font-size:22px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+
+.topMeta{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+.connPill{display:flex; gap:8px; align-items:center; padding:6px 10px; border:1px solid var(--line); border-radius:999px}
+.connDot{width:10px; height:10px; border-radius:50%}
+.connDot.on{background:#35ff9a}
+.connDot.warn{background:#ffd86b}
+.connDot.off{background:#ff6b6b}
+
+.hostBanner{
+  margin-top:10px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(43,92,255,.22);
+  border:1px solid rgba(43,92,255,.4);
+  font-weight:700;
+  letter-spacing:.4px;
+}
+
+.hidden{display:none}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+  padding:12px;
+}
+@media(min-width:960px){
+  .grid{grid-template-columns: 1fr 1fr}
+  .wide{grid-column: 1 / -1}
+}
+
+.card{
+  background:rgba(18,26,51,.9);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
+}
+
+.between{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.row{display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap}
+
+input, textarea, select{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+}
+
+button{
+  border:1px solid rgba(255,255,255,.14);
+  background:var(--btn);
+  color:white;
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+button.secondary{background:var(--btn2)}
+button:disabled{opacity:.5; cursor:not-allowed}
+
+.pill{
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  font-size:12px;
+  color:var(--muted);
+}
+
+.wheelWrap{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-top:10px;
+}
+.pointer{
+  position:absolute;
+  top:-2px;
+  left:50%;
+  transform:translateX(-50%);
+  width:0; height:0;
+  border-left:12px solid transparent;
+  border-right:12px solid transparent;
+  border-bottom:22px solid rgba(255,255,255,.90);
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+
+.score{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+.label{color:var(--muted)}
+
+.players{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:10px}
+.player{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px;
+  background:rgba(255,255,255,.04);
+}
+.player.active{border-color:rgba(53,255,154,.55)}
+.player .tag{
+  display:inline-block;
+  margin-left:8px;
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--muted);
+}
+.player button{margin-top:8px; width:100%}
+
+.boardWrap{margin-top:10px}
+.vannaBoard{
+  display:grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap:6px;
+}
+.vCell{
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  letter-spacing:.5px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+}
+.vCell.off, .vCell.space{
+  border:none;
+  background:transparent;
+}
+.vCell.hiddenTile{
+  color:transparent;
+  background:rgba(43,92,255,.22);
+  border:1px solid rgba(43,92,255,.35);
+}
+
+/* FINAL countdown badge centered */
+.finalCountdownWrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255, 216, 107, .12);
+}
+.finalCountdownLabel{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.5px;
+  color:rgba(255,255,255,.9);
+}
+.finalCountdown{
+  min-width:36px;
+  text-align:center;
+  font-weight:900;
+  font-size:14px;
+}
+
+/* Final picker */
+.finalPicker{
+  margin-top:10px;
+  padding:10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+}
+.finalPickRow{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+.finalPickBox{
+  flex:1;
+  min-width:200px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:8px 10px;
+  background:rgba(0,0,0,.10);
+}
+.finalPickChips{
+  margin-top:4px;
+  font-weight:900;
+  letter-spacing:.6px;
+}
+
+/* MODAL: closed by default */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  align-items:center; justify-content:center;
+  padding:16px;
+  display:none;
+}
+.modal.show{ display:flex; }
+.modalCard{
+  width:min(560px, 100%);
+  background:rgba(18,26,51,.97);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+}
