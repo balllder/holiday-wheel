@@ -1,78 +1,209 @@
-# Holiday Wheel (Wheel-of-Fortune style party game)
+# Holiday Wheel 🎡
+*A Wheel-of-Fortune–style holiday party game*
 
-A browser-based, multiplayer “Wheel of Fortune”-style holiday party game with a **host** and up to **8+ players** connecting from their own devices on the same network.
+A browser-based, multiplayer **Wheel of Fortune–style** game designed for family gatherings, holidays, and parties. One device acts as the **host**, while players join from their own phones, tablets, or laptops on the same network.
 
-> This project is intended for **at-home/party use** and is **not affiliated with Wheel of Fortune**.
-
----
-
-## What’s in this repo
-
-Core files and folders: :contentReference[oaicite:1]{index=1}
-
-- `app.py` — Python backend (web server + game logic)
-- `templates/` — HTML templates
-- `static/` — frontend assets (JS/CSS/images)
-- `puzzles.db` — SQLite database with puzzle packs
-- `requirements.txt` — Python dependencies
-
-The project includes Python + JavaScript + HTML + CSS. :contentReference[oaicite:2]{index=2}
+> ⚠️ This project is for **personal / party use only** and is **not affiliated with or endorsed by Wheel of Fortune®, Sony, or any broadcaster**.
 
 ---
 
-## Features (gameplay)
+## ✨ Features
 
-Typical flow:
-- One device “claims host”
-- Players join from phones/tablets/laptops and “claim” a player slot
-- Host sets up players, picks a puzzle pack, and starts rounds
-- Players can only **spin/guess/solve** on their turn (enforced by the server)
-
-Game modes supported (depending on what your current build exposes in the UI):
-- Regular rounds (spin → guess consonant → bank winnings/prizes → keep turn if correct)
-- Toss-Up (auto-reveal like the TV game)
-- Final Round experience (host starts final, finalist is selected by total value)
-
-Prize wedge behavior (as implemented in this project’s “TV-style” rules):
-- If a player lands on a **Prize**, they must guess a correct consonant to “bank” it.
-- If they miss, the prize is lost and play passes to the next player.
-- When banked, the prize wedge converts to a randomized cash value for the rest of the game.
-
-Puzzle packs:
-- Puzzles are stored in SQLite (`puzzles.db`)
-- Packs are selectable by the host from a dropdown
-- Packs can be imported from JSON (host-only), if your build includes the import UI/endpoint.
+- 🎡 TV-style spinning wheel (cash, prizes, bankrupt, lose-a-turn)
+- 👥 Multiple players (default 8, configurable by host)
+- 🧑‍💼 Secure **Host Mode**
+- 📱 Mobile-friendly clients
+- 🧩 Puzzle packs stored in SQLite
+- 📦 JSON puzzle-pack import (host-only)
+- 🎁 Prize wedges that convert to cash after banking
+- ⚡ Toss-Up rounds with auto-revealing letters
+- 🏁 Final Round with RSTLNE + timed solve
+- 🔒 Turn enforcement (only active player can act)
 
 ---
 
-## Requirements
+## 📁 Repository Structure
 
-- Python 3.11+ recommended (Linux hosting recommended)
-- A modern browser for clients (Chrome/Safari/Firefox)
+holiday-wheel/
+├── app.py # Flask + Socket.IO backend
+├── requirements.txt # Python dependencies
+├── puzzles.db # SQLite database (runtime)
+├── templates/
+│ └── index.html # Main UI
+├── static/
+│ ├── app.js # Frontend logic
+│ └── styles.css # Styling
+├── README.md
+└── LICENSE
 
-> If you previously tried Python 3.14 on Windows and hit dependency issues (gevent/eventlet builds), switch to Linux hosting and/or a supported Python version.
 
 ---
 
-## Setup (local dev)
+## 🧰 Requirements
 
-### 1) Clone
+- **Python 3.11+** (Linux strongly recommended)
+- Modern browser (Chrome, Firefox, Safari)
+- Devices on the same local network
+
+> ⚠️ Python 3.14 on Windows may fail to build networking libraries  
+> ✔️ Linux hosting is recommended for stability
+
+---
+
+## 🚀 Setup (Local Development)
+
+### 1) Clone the repository
 ```bash
 git clone https://github.com/balllder/holiday-wheel.git
 cd holiday-wheel
 ```
 ### 2) Create a virtual environment
-
-Linux/macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
-
-Windows (Command Prompt):
-```bat
-py -m venv .venv
-.venv\Scripts\activate.bat
+### 3) Install dependencies
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
+### 4) Run the server
+```bash
+python app.py
+```
+Open in a browser:
 
+http://127.0.0.1:5000
 
+📱 Playing on Phones / Tablets
+
+    Find the host computer’s LAN IP:
+
+        Linux/macOS: ip addr or ifconfig
+
+        Windows: ipconfig
+
+    Ensure the server is listening on 0.0.0.0:5000
+
+    On phones/tablets (same Wi-Fi), open:
+
+http://<HOST_IP>:5000
+
+If it doesn’t load:
+
+    Disable guest Wi-Fi isolation
+
+    Allow TCP port 5000 in firewall
+
+    Confirm devices are on the same subnet
+
+🧑‍💼 Host Mode
+
+    Click Host Mode
+
+    Enter the host code (default: holiday)
+
+    Unlocks admin controls:
+
+        New Game / New Puzzle
+
+        Start Toss-Up / Final Round
+
+        Set players
+
+        Import puzzle packs
+
+        Configure game settings
+
+🧩 Puzzle Packs (JSON Import)
+
+Puzzle packs are stored in SQLite and selectable by name.
+JSON format
+
+{
+  "packs": [
+    {
+      "name": "CHRISTMAS HARD",
+      "puzzles": [
+        { "category": "PHRASE", "answer": "HANGING STOCKINGS BY THE FIREPLACE" },
+        { "category": "FOOD & DRINK", "answer": "HOT COCOA WITH MARSHMALLOWS" }
+      ]
+    }
+  ]
+}
+
+Rules
+
+    Answers should be ALL CAPS
+
+    Letters and spaces only
+
+    Use Wheel-style categories
+
+🎮 Gameplay Notes
+Prize Wedges
+
+    Land on prize → must guess a correct consonant
+
+    Correct → prize is banked
+
+    Prize wedge converts to cash for the rest of the game
+
+    Miss → prize lost, next player’s turn
+
+Toss-Up
+
+    Letters auto-reveal gradually (TV style)
+
+    Players buzz in to take control
+
+    First correct solve wins
+
+Final Round
+
+    Finalist chosen by highest total cash + prize value
+
+    RSTLNE revealed automatically
+
+    Finalist picks 3 consonants + 1 vowel
+
+    Timed solve attempt
+
+🛠 Troubleshooting
+Buttons don’t respond
+
+    Open browser dev tools (F12)
+
+    Check console for JavaScript errors
+
+    Confirm app.js and socket.io load successfully
+
+Socket.IO protocol error
+
+    Ensure frontend Socket.IO version matches backend
+
+    Use pinned versions from requirements.txt
+
+Wheel pointer mismatch
+
+    Canvas scaling issue (mobile zoom/orientation)
+
+    Refresh page or rotate device
+
+🔧 Customization Ideas
+
+    Add more holiday or seasonal puzzle packs
+
+    Adjust toss-up reveal speed
+
+    Add sound effects
+
+    Customize wheel wedges and prize list
+
+    Add pack export to JSON
+
+📜 License
+
+This project is licensed under the MIT License.
+See LICENSE
+for details.
