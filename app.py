@@ -575,7 +575,10 @@ class GameState:
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").strip()
+cors_allowed = "*" if not CORS_ORIGINS else [o.strip() for o in CORS_ORIGINS.split(",") if o.strip()]
+socketio = SocketIO(app, cors_allowed_origins=cors_allowed, async_mode="gevent")
+
 
 db_init()
 db_seed_defaults_if_empty()
