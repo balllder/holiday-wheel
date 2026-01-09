@@ -8,8 +8,7 @@ from app import GAMES, app, socketio  # noqa: E402
 
 class TestWebSocketConnection:
     def setup_method(self):
-        """Clear game state before each test."""
-        GAMES.clear()
+        """Set up test client before each test."""
         self.client = socketio.test_client(app)
 
     def teardown_method(self):
