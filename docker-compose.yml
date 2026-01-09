@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - HOST_CODE=holiday
+      - SECRET_KEY=change-me-in-production
+      - DB_PATH=/app/data/puzzles.db
+      - CORS_ORIGINS=*
+    restart: unless-stopped

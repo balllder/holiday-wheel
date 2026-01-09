@@ -40,6 +40,12 @@ The server starts at http://localhost:5000
 gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker app:app
 ```
 
+**Docker:**
+```bash
+docker compose up -d
+```
+The database persists in the `./data` directory.
+
 ### Configuration
 
 Set these environment variables to customize the application:
