@@ -17,6 +17,9 @@ python app.py
 
 # Run production server
 gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker app:app
+
+# Run with Docker
+docker compose up -d
 ```
 
 ## Environment Variables
@@ -66,3 +69,9 @@ gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker a
 - Lines 452-511: Wheel animation
 - Lines 515-648: Event listeners
 - Lines 649-727: WebSocket event listeners
+
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
+- **build**: Installs dependencies, checks Python syntax
+- **docker**: Builds Docker image
