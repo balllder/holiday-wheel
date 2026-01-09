@@ -31,7 +31,7 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 ruff check .
 
 # Type check
-mypy app.py --ignore-missing-imports
+mypy app.py
 
 # Install pre-commit hooks
 pre-commit install
