@@ -1,6 +1,5 @@
 import os
 import sys
-import tempfile
 
 # Set test database path before importing app
 os.environ["DB_PATH"] = ":memory:"
@@ -8,15 +7,15 @@ os.environ["DB_PATH"] = ":memory:"
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import (
+    ALPHABET,
+    DEFAULT_VOWEL_COST,
+    VOWELS,
+    GameState,
+    Player,
     _csv_from_ints,
     _ints_from_csv,
-    Player,
-    GameState,
-    player_tv_total,
     pick_tv_winner_indexes,
-    ALPHABET,
-    VOWELS,
-    DEFAULT_VOWEL_COST,
+    player_tv_total,
 )
 
 
