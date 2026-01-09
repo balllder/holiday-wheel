@@ -20,6 +20,9 @@ gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker a
 
 # Run with Docker
 docker compose up -d
+
+# Run tests
+pytest tests/ -v
 ```
 
 ## Environment Variables
@@ -73,5 +76,5 @@ docker compose up -d
 ## CI/CD
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
-- **build**: Installs dependencies, checks Python syntax
+- **build**: Installs dependencies, checks Python syntax, runs tests
 - **docker**: Builds Docker image

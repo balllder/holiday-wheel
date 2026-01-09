@@ -24,6 +24,9 @@ jobs:
       - name: Check syntax
         run: python -m py_compile app.py
 
+      - name: Run tests
+        run: pytest tests/ -v
+
   docker:
     runs-on: ubuntu-latest
 
