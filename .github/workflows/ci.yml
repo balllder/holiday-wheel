@@ -27,6 +27,9 @@ jobs:
       - name: Lint with ruff
         run: ruff check .
 
+      - name: Type check with mypy
+        run: mypy app.py --ignore-missing-imports
+
       - name: Run tests with coverage
         run: pytest tests/ -v --cov=app --cov-report=term-missing --cov-report=xml
 
