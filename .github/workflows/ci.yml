@@ -28,7 +28,6 @@ jobs:
         run: ruff check .
 
       - name: Type check with mypy
-        continue-on-error: true
         run: mypy app.py
 
       - name: Run tests with coverage
