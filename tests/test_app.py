@@ -1,13 +1,7 @@
-import os
 import sys
-import tempfile
+from pathlib import Path
 
-# Set test database path before importing app
-_test_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-os.environ["DB_PATH"] = _test_db.name
-_test_db.close()
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app import (  # noqa: E402
     ALPHABET,
