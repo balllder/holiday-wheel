@@ -24,6 +24,9 @@ docker compose up -d
 # Run tests
 pytest tests/ -v
 
+# Run tests with coverage
+pytest tests/ -v --cov=app --cov-report=term-missing
+
 # Lint
 ruff check .
 
