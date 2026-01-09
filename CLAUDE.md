@@ -30,6 +30,9 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 # Lint
 ruff check .
 
+# Format
+ruff format .
+
 # Type check
 mypy app.py
 
@@ -88,5 +91,15 @@ pre-commit install
 ## CI/CD
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
-- **build**: Installs dependencies, checks syntax, lints with ruff, runs tests
+- **build**: Installs dependencies, checks syntax, lints with ruff, type checks with mypy, runs tests with coverage
 - **docker**: Builds Docker image
+
+Coverage reports are uploaded to [Codecov](https://codecov.io/gh/balllder/holiday-wheel).
+
+## Tooling
+
+- **ruff**: Linting and formatting (config in `pyproject.toml`)
+- **mypy**: Type checking (config in `mypy.ini`)
+- **pytest**: Testing with pytest-cov for coverage
+- **pre-commit**: Git hooks for ruff and mypy (config in `.pre-commit-config.yaml`)
+- **Dependabot**: Automated dependency updates weekly (config in `.github/dependabot.yml`)
