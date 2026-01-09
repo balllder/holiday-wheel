@@ -1,5 +1,8 @@
 # Holiday Wheel of Fortune
 
+[![CI](https://github.com/balllder/holiday-wheel/actions/workflows/ci.yml/badge.svg)](https://github.com/balllder/holiday-wheel/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/balllder/holiday-wheel/graph/badge.svg)](https://codecov.io/gh/balllder/holiday-wheel)
+
 A real-time multiplayer web game where players spin a wheel, guess letters, and solve word puzzles. Built with Flask and WebSockets for seamless multiplayer gameplay.
 
 ## Setup

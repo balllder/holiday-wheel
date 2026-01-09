@@ -28,7 +28,13 @@ jobs:
         run: ruff check .
 
       - name: Run tests with coverage
-        run: pytest tests/ -v --cov=app --cov-report=term-missing
+        run: pytest tests/ -v --cov=app --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
 
   docker:
     runs-on: ubuntu-latest
