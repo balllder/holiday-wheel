@@ -1,12 +1,15 @@
 import os
 import sys
+import tempfile
 
 # Set test database path before importing app
-os.environ["DB_PATH"] = ":memory:"
+_test_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+os.environ["DB_PATH"] = _test_db.name
+_test_db.close()
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import (
+from app import (  # noqa: E402
     ALPHABET,
     DEFAULT_VOWEL_COST,
     VOWELS,
