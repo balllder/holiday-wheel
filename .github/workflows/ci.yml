@@ -28,7 +28,7 @@ jobs:
         run: ruff check .
 
       - name: Type check with mypy
-        run: mypy app.py --config-file pyproject.toml
+        run: mypy app.py
 
       - name: Run tests with coverage
         run: pytest tests/ -v --cov=app --cov-report=term-missing --cov-report=xml
