@@ -26,6 +26,9 @@ pytest tests/ -v
 
 # Lint
 ruff check .
+
+# Install pre-commit hooks
+pre-commit install
 ```
 
 ## Environment Variables
