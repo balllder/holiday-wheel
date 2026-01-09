@@ -23,6 +23,9 @@ docker compose up -d
 
 # Run tests
 pytest tests/ -v
+
+# Lint
+ruff check .
 ```
 
 ## Environment Variables
@@ -76,5 +79,5 @@ pytest tests/ -v
 ## CI/CD
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
-- **build**: Installs dependencies, checks Python syntax, runs tests
+- **build**: Installs dependencies, checks syntax, lints with ruff, runs tests
 - **docker**: Builds Docker image

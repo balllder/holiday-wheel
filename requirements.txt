@@ -7,3 +7,4 @@ gevent==25.9.1
 gevent-websocket==0.10.1
 gunicorn==22.0.0
 pytest==8.3.4
+ruff==0.8.6
