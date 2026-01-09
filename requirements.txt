@@ -9,6 +9,6 @@ gunicorn==22.0.0
 pytest==8.3.4
 pytest-cov==4.1.0
 ruff==0.8.6
-pre-commit==4.0.1
+pre-commit==4.5.1
 mypy==1.13.0
 types-Flask==1.1.6
