@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/balllder/holiday-wheel/actions/workflows/ci.yml/badge.svg)](https://github.com/balllder/holiday-wheel/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/balllder/holiday-wheel/graph/badge.svg)](https://codecov.io/gh/balllder/holiday-wheel)
+[![Docker Hub](https://img.shields.io/docker/v/clockboy/holiday-wheel?label=Docker%20Hub)](https://hub.docker.com/r/clockboy/holiday-wheel)
 
 A real-time multiplayer web game where players spin a wheel, guess letters, and solve word puzzles. Built with Flask and WebSockets for seamless multiplayer gameplay.
 
@@ -43,10 +44,16 @@ The server starts at http://localhost:5000
 gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker app:app
 ```
 
-**Docker:**
+**Docker (from Docker Hub):**
+```bash
+docker run -d -p 5000:5000 -v ./data:/app/data clockboy/holiday-wheel
+```
+
+**Docker (from source):**
 ```bash
 docker compose up -d
 ```
+
 The database persists in the `./data` directory.
 
 ### Configuration

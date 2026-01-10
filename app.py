@@ -9,6 +9,11 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Flask, jsonify, render_template, request
 from flask_socketio import SocketIO, emit, join_room
 
+
+# Type helper: Flask-SocketIO adds 'sid' attribute to request at runtime
+def _get_sid() -> Optional[str]:
+    return getattr(request, "sid", None)
+
 HOST_CODE = os.environ.get("HOST_CODE", "holiday")
 DB_PATH = os.environ.get("DB_PATH", "puzzles.db")
 
@@ -576,7 +581,8 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").strip()
 cors_allowed = "*" if not CORS_ORIGINS else [o.strip() for o in CORS_ORIGINS.split(",") if o.strip()]
-socketio = SocketIO(app, cors_allowed_origins=cors_allowed, async_mode="gevent")
+ASYNC_MODE = os.environ.get("SOCKETIO_ASYNC_MODE", "gevent")
+socketio = SocketIO(app, cors_allowed_origins=cors_allowed, async_mode=ASYNC_MODE)
 
 
 db_init()
@@ -745,7 +751,7 @@ def list_packs(data):
 def set_active_pack(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
-    if request.sid != g.host_sid:
+    if _get_sid() != g.host_sid:
         emit("toast", {"msg": "Host only."})
         return
 
@@ -769,17 +775,17 @@ def on_disconnect():
     for g in GAMES.values():
         changed = False
         for p in g.players:
-            if p.claimed_sid == request.sid:
+            if p.claimed_sid == _get_sid():
                 p.claimed_sid = None
                 changed = True
-        if g.host_sid == request.sid:
+        if g.host_sid == _get_sid():
             g.host_sid = None
             changed = True
-        if g.tossup_controller_sid == request.sid:
+        if g.tossup_controller_sid == _get_sid():
             g.tossup_controller_sid = None
             changed = True
-        if request.sid in g.tossup_locked_sids:
-            g.tossup_locked_sids.discard(request.sid)
+        if _get_sid() in g.tossup_locked_sids:
+            g.tossup_locked_sids.discard(_get_sid())
             changed = True
         if changed:
             broadcast(g.room)
@@ -796,7 +802,7 @@ def claim_host(data):
         emit("host_granted", {"granted": False})
         return
 
-    g.host_sid = request.sid
+    g.host_sid = _get_sid()
     emit("host_granted", {"granted": True})
     emit("toast", {"msg": "Host mode enabled on this device."})
     broadcast(room)
@@ -806,7 +812,7 @@ def claim_host(data):
 def release_host(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
-    if g.host_sid != request.sid:
+    if g.host_sid != _get_sid():
         emit("toast", {"msg": "Only the host can release host mode."})
         return
     g.host_sid = None
@@ -833,15 +839,15 @@ def claim_player(data):
         return
 
     p = g.players[pid]
-    if p.claimed_sid is not None and p.claimed_sid != request.sid:
+    if p.claimed_sid is not None and p.claimed_sid != _get_sid():
         emit("toast", {"msg": "That player slot is already claimed."})
         return
 
     for op in g.players:
-        if op.claimed_sid == request.sid:
+        if op.claimed_sid == _get_sid():
             op.claimed_sid = None
 
-    p.claimed_sid = request.sid
+    p.claimed_sid = _get_sid()
     if name:
         p.name = name[:24]
 
@@ -856,7 +862,7 @@ def release_player(data):
     g = get_game(room)
     changed = False
     for p in g.players:
-        if p.claimed_sid == request.sid:
+        if p.claimed_sid == _get_sid():
             p.claimed_sid = None
             changed = True
     if changed:
@@ -866,14 +872,14 @@ def release_player(data):
 
 
 def require_active_player(g: GameState) -> bool:
-    return g.active_player().claimed_sid == request.sid
+    return g.active_player().claimed_sid == _get_sid()
 
 
 @socketio.on("load_pack")
 def load_pack(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
-    if request.sid != g.host_sid:
+    if _get_sid() != g.host_sid:
         emit("toast", {"msg": "Host only."})
         return
 
@@ -907,7 +913,7 @@ def load_pack(data):
 def new_puzzle(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
-    if request.sid != g.host_sid:
+    if _get_sid() != g.host_sid:
         emit("toast", {"msg": "Host only."})
         return
     ok = g.pick_next_puzzle()
@@ -922,7 +928,7 @@ def new_puzzle(data):
 def new_game(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
-    if request.sid != g.host_sid:
+    if _get_sid() != g.host_sid:
         emit("toast", {"msg": "Host only."})
         return
     g.reset_game()
