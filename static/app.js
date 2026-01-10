@@ -130,9 +130,6 @@ let iAmHost = false;
 
 function toast(msg){
   els.status.textContent = msg || "";
-  if(msg){
-    setTimeout(()=>{ if(els.status.textContent === msg) els.status.textContent = ""; }, 6000);
-  }
 }
 
 function setConn(status){
@@ -644,7 +641,10 @@ els.releaseHostBtn.addEventListener("click", ()=>{
 });
 
 /* ---------- Controls ---------- */
-els.spinBtn.addEventListener("click", ()=> socket.emit("spin", { room: ROOM }));
+els.spinBtn.addEventListener("click", ()=>{
+  els.status.textContent = "";
+  socket.emit("spin", { room: ROOM });
+});
 els.buzzBtn.addEventListener("click", ()=> socket.emit("buzz", { room: ROOM }));
 
 els.guessBtn.addEventListener("click", ()=>{
@@ -749,7 +749,7 @@ socket.on("state", (s)=>{
 
   const pid = state.puzzle?.id != null ? ` (id: ${state.puzzle.id})` : "";
   els.category.textContent = `Category: ${state.puzzle.category}${pid}`;
-  els.usedLetters.textContent = `Used: ${(state.used||[]).join(" ") || "—"}`;
+  els.usedLetters.textContent = iAmHost ? `Used: ${(state.used||[]).join(" ") || "—"}` : "";
 
   els.wedgeValue.textContent = wedgeLabel(state.current_wedge);
 
