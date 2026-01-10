@@ -1096,6 +1096,250 @@ def solve(data):
         emit("toast", {"msg": f"Solved! Next puzzle loaded (id: {g.puzzle.get('id')})."})
     broadcast(room)
 
+
+@socketio.on("buzz")
+def buzz(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+
+    if g.phase != "tossup":
+        emit("toast", {"msg": "Buzz is only available during toss-up."})
+        return
+
+    sid = _get_sid()
+    if sid in g.tossup_locked_sids:
+        emit("toast", {"msg": "You are locked out for this toss-up."})
+        return
+
+    if g.tossup_controller_sid is not None:
+        emit("toast", {"msg": "Someone else already buzzed in."})
+        return
+
+    player_idx = None
+    for i, p in enumerate(g.players):
+        if p.claimed_sid == sid:
+            player_idx = i
+            break
+
+    if player_idx is None:
+        emit("toast", {"msg": "Claim a player slot first."})
+        return
+
+    if g.tossup_allowed_player_idxs and player_idx not in g.tossup_allowed_player_idxs:
+        emit("toast", {"msg": "You are not allowed to buzz in this round."})
+        return
+
+    g.tossup_controller_sid = sid
+    g.active_idx = player_idx
+    emit("toast", {"msg": f"{g.players[player_idx].name} buzzed in!"}, room=room)
+    broadcast(room)
+
+
+@socketio.on("start_tossup")
+def start_tossup(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    g.phase = "tossup"
+    g.tossup_controller_sid = None
+    g.tossup_locked_sids = set()
+    g.tossup_allowed_player_idxs = []
+    g.tossup_is_tiebreaker = False
+    g.revealed = set()
+    g.used_letters = set()
+    g.build_tossup_reveal_order()
+    g.clear_turn_state()
+
+    emit("toast", {"msg": "Toss-up started!"})
+    broadcast(room)
+    start_tossup_reveal_loop(room)
+
+
+@socketio.on("end_tossup")
+def end_tossup(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    g.phase = "normal"
+    g.tossup_controller_sid = None
+    g.tossup_locked_sids = set()
+    g.tossup_reveal_order = []
+    g.tossup_allowed_player_idxs = []
+
+    emit("toast", {"msg": "Toss-up ended."})
+    broadcast(room)
+
+
+@socketio.on("start_final")
+def start_final(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    g.final_start_pick()
+    emit("toast", {"msg": "Final round started! Pick 3 consonants and 1 vowel."})
+    broadcast(room)
+
+
+@socketio.on("end_final")
+def end_final(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    g.phase = "normal"
+    g.final_reset()
+    emit("toast", {"msg": "Final round ended."})
+    broadcast(room)
+
+
+@socketio.on("final_pick")
+def final_pick(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+
+    if g.phase != "final" or g.final_stage != "pick":
+        emit("toast", {"msg": "Not in final pick phase."})
+        return
+
+    sid = _get_sid()
+    player_idx = None
+    for i, p in enumerate(g.players):
+        if p.claimed_sid == sid:
+            player_idx = i
+            break
+
+    if player_idx is None or player_idx != g.active_idx:
+        emit("toast", {"msg": "Only the active player can pick."})
+        return
+
+    kind = (data or {}).get("kind", "")
+    letter = str((data or {}).get("letter", "")).upper().strip()
+
+    if len(letter) != 1 or letter not in ALPHABET:
+        emit("toast", {"msg": "Enter a letter A–Z."})
+        return
+
+    if letter in g.used_letters:
+        emit("toast", {"msg": f"{letter} already picked or in RSTLNE."})
+        return
+
+    if kind == "consonant":
+        if letter in VOWELS:
+            emit("toast", {"msg": f"{letter} is a vowel."})
+            return
+        if len(g.final_picks_consonants) >= 3:
+            emit("toast", {"msg": "Already picked 3 consonants."})
+            return
+        g.final_picks_consonants.append(letter)
+        g.used_letters.add(letter)
+        emit("toast", {"msg": f"Picked consonant: {letter}"})
+    elif kind == "vowel":
+        if letter not in VOWELS:
+            emit("toast", {"msg": f"{letter} is not a vowel."})
+            return
+        if g.final_pick_vowel is not None:
+            emit("toast", {"msg": "Already picked a vowel."})
+            return
+        g.final_pick_vowel = letter
+        g.used_letters.add(letter)
+        emit("toast", {"msg": f"Picked vowel: {letter}"})
+    else:
+        emit("toast", {"msg": "Invalid pick kind."})
+        return
+
+    if g.final_all_picks_complete():
+        g.final_reveal_picks()
+        g.final_stage = "running"
+        g.final_end_ts = time.time() + g.final_seconds
+        emit("toast", {"msg": "All picks complete! Solve now!"}, room=room)
+        start_final_timer_loop(room)
+
+    broadcast(room)
+
+
+@socketio.on("set_players")
+def set_players(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    names = (data or {}).get("names", [])
+    if not isinstance(names, list) or len(names) == 0:
+        emit("toast", {"msg": "Provide a list of player names."})
+        return
+
+    g.players = [Player(i, str(n)[:30]) for i, n in enumerate(names)]
+    g.active_idx = 0
+    emit("toast", {"msg": f"Set {len(g.players)} players."})
+    broadcast(room)
+
+
+@socketio.on("set_prize_names")
+def set_prize_names(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    names = (data or {}).get("names", [])
+    if not isinstance(names, list):
+        emit("toast", {"msg": "Provide a list of prize names."})
+        return
+
+    prize_idx = 0
+    for i, slot in enumerate(g.wheel_slots):
+        if isinstance(slot, dict) and slot.get("type") == "PRIZE":
+            if prize_idx < len(names) and names[prize_idx]:
+                g.wheel_slots[i] = {"type": "PRIZE", "name": str(names[prize_idx])[:30]}
+            prize_idx += 1
+
+    emit("toast", {"msg": f"Updated {min(prize_idx, len(names))} prize names."})
+    broadcast(room)
+
+
+@socketio.on("set_config")
+def set_config(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+
+    config = (data or {}).get("config", {})
+    if not isinstance(config, dict):
+        emit("toast", {"msg": "Invalid config."})
+        return
+
+    if "vowel_cost" in config:
+        g.vowel_cost = int(config["vowel_cost"])
+    if "final_seconds" in config:
+        g.final_seconds = int(config["final_seconds"])
+    if "final_jackpot" in config:
+        g.final_jackpot = int(config["final_jackpot"])
+    if "prize_replace_cash_values" in config:
+        vals = config["prize_replace_cash_values"]
+        if isinstance(vals, list):
+            g.prize_replace_cash_values = [int(v) for v in vals if isinstance(v, (int, float))]
+
+    db_set_room_config(room, g.vowel_cost, g.final_seconds, g.final_jackpot, g.prize_replace_cash_values)
+    emit("toast", {"msg": "Config saved."})
+    broadcast(room)
+
+
 @app.post("/api/import_packs")
 def api_import_packs():
     room = request.args.get("room", "main")
