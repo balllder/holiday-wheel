@@ -4,16 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Holiday Wheel of Fortune</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=7" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=8" />
 </head>
 <body>
   <header class="top">
     <h1>Holiday Wheel of Fortune</h1>
     <div class="topMeta">
       <div class="muted small">Room: <b id="roomLabel"></b> • <span id="packCount">—</span></div>
-      <div class="connPill">
-        <span id="connDot" class="connDot off"></span>
-        <span id="connText" class="muted small">Disconnected</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="themeToggle" class="themeToggle" type="button" title="Toggle theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <div class="connPill">
+          <span id="connDot" class="connDot off"></span>
+          <span id="connText" class="muted small">Disconnected</span>
+        </div>
       </div>
     </div>
     <div id="hostBanner" class="hostBanner hidden">HOST MODE ACTIVE</div>
@@ -237,6 +242,6 @@
 
   <script>window.__ROOM__ = "{{ room }}";</script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=7"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=8"></script>
 </body>
 </html>

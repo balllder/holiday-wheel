@@ -90,7 +90,32 @@ const els = {
   hostSetActiveBtn: el("hostSetActiveBtn"),
 
   wheel: el("wheel"),
+  themeToggle: el("themeToggle"),
+  themeIcon: el("themeIcon"),
 };
+
+/* Theme toggle */
+function initTheme(){
+  const saved = localStorage.getItem("theme");
+  if(saved === "light"){
+    document.documentElement.setAttribute("data-theme", "light");
+    els.themeIcon.textContent = "🌙";
+  }
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute("data-theme");
+  if(current === "light"){
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("theme", "dark");
+    els.themeIcon.textContent = "☀️";
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("theme", "light");
+    els.themeIcon.textContent = "🌙";
+  }
+}
+initTheme();
+els.themeToggle.addEventListener("click", toggleTheme);
 
 els.roomLabel.textContent = ROOM;
 
@@ -454,11 +479,37 @@ const ctx = els.wheel.getContext("2d");
 let wheelAngle = 0;
 let wheelAnim = null;
 
+/* Responsive wheel sizing */
+function resizeWheel(){
+  const container = els.wheel.parentElement;
+  const maxSize = 360;
+  const minSize = 200;
+  const containerWidth = container.clientWidth - 24; // account for padding
+  const size = Math.max(minSize, Math.min(maxSize, containerWidth));
+
+  if(els.wheel.width !== size || els.wheel.height !== size){
+    els.wheel.width = size;
+    els.wheel.height = size;
+    // Redraw after resize
+    if(state?.wheel_slots){
+      const labels = state.wheel_slots.map(labelForSlot);
+      drawWheel(labels);
+    }
+  }
+}
+
+let resizeTimeout;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(resizeWheel, 100);
+});
+
 function drawWheel(labels){
   const n = labels.length || 1;
   const arc = (Math.PI * 2) / n;
   const cx = els.wheel.width/2, cy = els.wheel.height/2;
   const radius = Math.min(cx,cy)-6;
+  const fontSize = Math.max(10, Math.floor(els.wheel.width / 26));
 
   ctx.clearRect(0,0,els.wheel.width,els.wheel.height);
 
@@ -480,7 +531,7 @@ function drawWheel(labels){
     ctx.rotate(start+arc/2);
     ctx.textAlign="right";
     ctx.fillStyle="rgba(233,238,255,.95)";
-    ctx.font="bold 14px system-ui";
+    ctx.font=`bold ${fontSize}px system-ui`;
     ctx.fillText(String(labels[i]), radius-12, 5);
     ctx.restore();
   }
@@ -510,6 +561,7 @@ function spinToIndex(targetIndex, labels){
   wheelAnim = requestAnimationFrame(step);
 }
 
+resizeWheel();
 drawWheel(["…"]);
 
 /* ---------- Players + claiming ---------- */
