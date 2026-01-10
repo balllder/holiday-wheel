@@ -936,6 +936,22 @@ def new_game(data):
     broadcast(room)
 
 
+@socketio.on("set_active_player")
+def set_active_player(data):
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+    player_idx = data.get("player_idx")
+    if not isinstance(player_idx, int) or player_idx < 0 or player_idx >= len(g.players):
+        emit("toast", {"msg": "Invalid player index."})
+        return
+    g.active_idx = player_idx
+    emit("toast", {"msg": f"Active player set to {g.players[player_idx].name}."})
+    broadcast(room)
+
+
 @socketio.on("spin")
 def spin(data):
     room = (data or {}).get("room", "main")
