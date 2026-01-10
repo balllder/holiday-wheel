@@ -141,6 +141,16 @@ button:disabled{opacity:.5; cursor:not-allowed}
   color:var(--muted);
 }
 
+.statusHighlight{
+  margin-top:10px;
+  font-size:15px;
+  font-weight:700;
+  color:#ffd86b;
+}
+.statusHighlight:empty{
+  display:none;
+}
+
 .wheelWrap{
   position:relative;
   display:flex;

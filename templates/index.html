@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Holiday Wheel of Fortune</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=8" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9" />
 </head>
 <body>
   <header class="top">
@@ -68,6 +68,9 @@
         <div class="muted small" id="finalPickHint"></div>
       </div>
 
+      <div id="usedLetters" class="statusHighlight"></div>
+      <div id="status" class="statusHighlight"></div>
+
       <div class="row" id="normalGuessRow">
         <input id="letterInput" maxlength="1" placeholder="Letter" />
         <button id="guessBtn" type="button">Guess</button>
@@ -84,9 +87,6 @@
         <button id="solveBtn" type="button">Solve</button>
         <button id="buzzBtn" class="secondary" type="button">BUZZ</button>
       </div>
-
-      <div class="muted small" id="usedLetters"></div>
-      <div class="muted small" id="status"></div>
     </section>
 
     <section class="card">
