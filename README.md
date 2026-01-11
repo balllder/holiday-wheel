@@ -95,15 +95,16 @@ When both keys are set, registration is protected by invisible reCAPTCHA v3. Get
 
 ### User Authentication
 
-- **Registration**: Create an account with email and password
+- **Registration**: Dedicated registration page with password confirmation
 - **Email Verification**: Verify email address before logging in
+- **Spam Protection**: Optional invisible reCAPTCHA v3 on registration
 - **Persistent Login**: Stay logged in for 30 days with remember-me cookies
 - **Room Lobby**: Browse active rooms or create custom rooms
 - **Player Claiming**: Authenticated users can claim player slots that persist across reconnections
 
 ### Wheel Randomization
 
-Wheel wedge positions are randomized each time a new game starts, ensuring variety in gameplay.
+Wheel wedge positions are randomized when a room is created and each time a new game starts, ensuring variety in gameplay.
 
 ## How to Play
 

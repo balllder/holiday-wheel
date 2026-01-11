@@ -72,7 +72,9 @@ pre-commit install
 
 **Authentication (auth.py)**:
 - Flask Blueprint at `/auth` prefix
-- User registration with email verification
+- Separate login (`/auth/login`) and register (`/auth/register`) pages
+- User registration with email verification and password confirmation
+- Optional reCAPTCHA v3 spam protection (score-based, invisible)
 - Persistent login with 30-day remember-me cookies
 - Session integration with Socket.IO for player claim persistence
 
@@ -105,17 +107,18 @@ pre-commit install
 
 ## Code Organization
 
-**app.py** (~1,450 lines):
+**app.py** (~1,460 lines):
 - Lines 1-55: Imports and constants
 - Lines 56-336: Database helper functions (puzzles, packs, config)
-- Lines 338-580: `Player` and `GameState` dataclasses
+- Lines 338-580: `Player` and `GameState` dataclasses (with `__post_init__` for wheel shuffle)
 - Lines 582-750: Flask app setup, auth registration, background tasks
 - Lines 752-1400: WebSocket event handlers
-- Lines 1402-1450: REST API for bulk pack import
+- Lines 1402-1460: REST API for bulk pack import
 
-**auth.py** (~235 lines):
+**auth.py** (~285 lines):
 - Authentication blueprint with routes for login, register, verify, logout
 - `login_required` decorator and `get_current_user()` helper
+- `verify_recaptcha()` for reCAPTCHA v3 score validation
 - Room listing API for lobby
 
 **db_auth.py** (~190 lines):
@@ -129,6 +132,11 @@ pre-commit install
 - Lines 460-520: Wheel animation
 - Lines 520-700: Event listeners
 - Lines 700-785: WebSocket event listeners
+
+**static/auth.js** (~115 lines):
+- Login form handler (if on login page)
+- Register form handler with password confirmation validation
+- reCAPTCHA v3 token retrieval via `grecaptcha.execute()`
 
 ## CI/CD
 
