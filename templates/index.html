@@ -4,14 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Holiday Wheel of Fortune</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=10" />
 </head>
 <body>
   <header class="top">
     <h1>Holiday Wheel of Fortune</h1>
     <div class="topMeta">
       <div class="muted small">Room: <b id="roomLabel"></b> • <span id="packCount">—</span></div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        {% if user %}
+        <span class="muted small">{{ user.display_name }}</span>
+        <a href="/auth/lobby" class="small authLink">Rooms</a>
+        <button id="logoutBtn" class="secondary small" type="button">Logout</button>
+        {% else %}
+        <a href="/auth/login" class="small authLink">Login</a>
+        {% endif %}
         <button id="themeToggle" class="themeToggle" type="button" title="Toggle theme">
           <span id="themeIcon">☀️</span>
         </button>
@@ -242,6 +249,6 @@
 
   <script>window.__ROOM__ = "{{ room }}";</script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=9"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=10"></script>
 </body>
 </html>

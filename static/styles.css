@@ -435,3 +435,233 @@ input, textarea, select{
     max-height:200px;
   }
 }
+
+/* ========== AUTH STYLES ========== */
+
+.authPage{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.authContainer{
+  width:min(420px, 100%);
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
+}
+
+.authContainer h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.authTabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.authTab{
+  flex:1;
+  padding:10px;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--muted);
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.authTab.active{
+  background:var(--btn);
+  color:white;
+  border-color:var(--btn);
+}
+
+.authForm{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.formGroup{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.formGroup label{
+  font-weight:600;
+  font-size:14px;
+}
+
+.formHint{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.checkboxGroup{
+  flex-direction:row;
+  align-items:center;
+}
+
+.checkboxGroup label{
+  font-weight:400;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+}
+
+.checkboxGroup input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  min-height:auto;
+}
+
+.authSubmit{
+  padding:12px 16px;
+  background:var(--btn);
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.authSubmit:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.authSubmit.secondary{
+  background:var(--btn2);
+}
+
+.authError{
+  padding:10px 12px;
+  background:rgba(255,107,107,.15);
+  border:1px solid rgba(255,107,107,.4);
+  border-radius:8px;
+  color:#ff6b6b;
+  font-size:14px;
+}
+
+.authSuccess{
+  padding:10px 12px;
+  background:rgba(53,255,154,.15);
+  border:1px solid rgba(53,255,154,.4);
+  border-radius:8px;
+  color:#35ff9a;
+  font-size:14px;
+}
+
+/* Verify result page */
+.verifyResult{
+  text-align:center;
+  padding:20px 0;
+}
+
+.verifyIcon{
+  font-size:48px;
+  margin-bottom:10px;
+}
+
+.verifyResult.success .verifyIcon{
+  color:#35ff9a;
+}
+
+.verifyResult.error .verifyIcon{
+  color:#ff6b6b;
+}
+
+.verifyResult h2{
+  margin:0 0 10px 0;
+}
+
+.verifyResult p{
+  color:var(--muted);
+  margin-bottom:20px;
+}
+
+/* Lobby page */
+.lobbyMain{
+  max-width:600px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.lobbyCard{
+  margin-top:20px;
+}
+
+.customRoomSection{
+  margin-bottom:20px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--line);
+}
+
+.roomListSection h3{
+  margin:0 0 12px 0;
+  font-size:16px;
+}
+
+.roomList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.roomCard{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--player-bg);
+}
+
+.roomInfo{
+  flex:1;
+}
+
+.roomName{
+  font-weight:700;
+}
+
+.roomPlayers{
+  font-size:12px;
+}
+
+.loading{
+  text-align:center;
+  color:var(--muted);
+  padding:20px;
+}
+
+/* Auth link in header */
+.authLink{
+  color:var(--text);
+  text-decoration:none;
+  padding:4px 8px;
+  border-radius:6px;
+  background:var(--input-bg);
+  border:1px solid var(--line);
+}
+
+.authLink:hover{
+  background:var(--btn2);
+}
+
+button.small, .small{
+  font-size:12px;
+  padding:6px 10px;
+}

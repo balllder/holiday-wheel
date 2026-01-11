@@ -117,6 +117,12 @@ function toggleTheme(){
 initTheme();
 els.themeToggle.addEventListener("click", toggleTheme);
 
+/* Logout handler */
+document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+  await fetch("/auth/logout", { method: "POST" });
+  window.location.href = "/auth/login";
+});
+
 els.roomLabel.textContent = ROOM;
 
 const BOARD_ROWS = 4;

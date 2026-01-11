@@ -4,9 +4,10 @@ import random
 import sqlite3
 import time
 from dataclasses import dataclass, field
+from datetime import timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from flask_socketio import SocketIO, emit, join_room
 
 
@@ -346,6 +347,7 @@ class Player:
     round_bank: int = 0
     round_prizes: List[Dict[str, Any]] = field(default_factory=list)
     claimed_sid: Optional[str] = None
+    claimed_user_id: Optional[int] = None
 
 
 def _prize_value_sum(prizes: List[Any]) -> int:
@@ -502,6 +504,7 @@ class GameState:
 
         self.active_idx = 0
         self.wheel_slots = list(BASE_WHEEL)
+        random.shuffle(self.wheel_slots)
         self.revealed = set()
         self.used_letters = set()
         self.clear_turn_state()
@@ -579,14 +582,27 @@ class GameState:
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+if os.environ.get("FLASK_ENV") == "production":
+    app.config["SESSION_COOKIE_SECURE"] = True
+
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").strip()
 cors_allowed = "*" if not CORS_ORIGINS else [o.strip() for o in CORS_ORIGINS.split(",") if o.strip()]
 ASYNC_MODE = os.environ.get("SOCKETIO_ASYNC_MODE", "gevent")
 socketio = SocketIO(app, cors_allowed_origins=cors_allowed, async_mode=ASYNC_MODE)
 
+# Register auth blueprint
+from auth import auth_bp, get_current_user
+app.register_blueprint(auth_bp)
 
+# Initialize databases
 db_init()
 db_seed_defaults_if_empty()
+
+from db_auth import db_init_auth
+db_init_auth()
 
 GAMES: Dict[str, GameState] = {}
 
@@ -673,7 +689,8 @@ def broadcast(room: str):
 @app.get("/")
 def index():
     room = request.args.get("room", "main")
-    return render_template("index.html", room=room)
+    user = get_current_user()
+    return render_template("index.html", room=room, user=user)
 
 
 def start_tossup_reveal_loop(room: str):
@@ -736,6 +753,25 @@ def on_join(data):
     room = (data or {}).get("room", "main")
     join_room(room)
     g = get_game(room)
+
+    # Get user from session
+    user_id = session.get("user_id")
+    sid = _get_sid()
+
+    # Update room activity
+    from db_auth import db_update_room_activity
+    db_update_room_activity(room, user_id)
+
+    # Auto-restore player claim for authenticated users
+    if user_id:
+        for i, p in enumerate(g.players):
+            if p.claimed_user_id == user_id and p.claimed_sid is None:
+                p.claimed_sid = sid
+                emit("you", {"player_idx": i})
+                emit("toast", {"msg": f"Restored your claim on {p.name}."})
+                broadcast(room)
+                break
+
     emit("state", serialize(g))
 
 
@@ -828,6 +864,9 @@ def claim_player(data):
     name = str((data or {}).get("name", "")).strip()
     g = get_game(room)
 
+    user_id = session.get("user_id")
+    sid = _get_sid()
+
     try:
         pid = int(player_id)
     except Exception:
@@ -839,15 +878,31 @@ def claim_player(data):
         return
 
     p = g.players[pid]
-    if p.claimed_sid is not None and p.claimed_sid != _get_sid():
-        emit("toast", {"msg": "That player slot is already claimed."})
+
+    # Check if slot is claimed by another user
+    if p.claimed_user_id is not None and p.claimed_user_id != user_id:
+        emit("toast", {"msg": "That player slot is claimed by another user."})
         return
 
-    for op in g.players:
-        if op.claimed_sid == _get_sid():
-            op.claimed_sid = None
+    # Check if slot is claimed by another session (non-user)
+    if p.claimed_sid is not None and p.claimed_sid != sid:
+        if p.claimed_user_id is None:  # Only block if not our user
+            emit("toast", {"msg": "That player slot is already claimed."})
+            return
 
-    p.claimed_sid = _get_sid()
+    # Release any other claims by this user/sid
+    for op in g.players:
+        if op.claimed_sid == sid:
+            op.claimed_sid = None
+        if user_id and op.claimed_user_id == user_id:
+            op.claimed_user_id = None
+
+    p.claimed_sid = sid
+    p.claimed_user_id = user_id
+
+    # Use display_name from session if no name provided
+    if not name and user_id:
+        name = session.get("display_name", "")
     if name:
         p.name = name[:24]
 
@@ -860,10 +915,16 @@ def claim_player(data):
 def release_player(data):
     room = (data or {}).get("room", "main")
     g = get_game(room)
+    user_id = session.get("user_id")
+    sid = _get_sid()
     changed = False
     for p in g.players:
-        if p.claimed_sid == _get_sid():
+        if p.claimed_sid == sid:
             p.claimed_sid = None
+            p.claimed_user_id = None
+            changed = True
+        elif user_id and p.claimed_user_id == user_id:
+            p.claimed_user_id = None
             changed = True
     if changed:
         emit("you", {"player_idx": None})

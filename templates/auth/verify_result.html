@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel - Email Verification</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="authPage">
+    <div class="authContainer">
+      <h1>Holiday Wheel of Fortune</h1>
+
+      {% if success %}
+      <div class="verifyResult success">
+        <div class="verifyIcon">&#10003;</div>
+        <h2>Email Verified!</h2>
+        <p>{{ message }}</p>
+        <a href="{{ url_for('auth.login') }}" class="authSubmit" style="display:inline-block; text-decoration:none; text-align:center;">Go to Login</a>
+      </div>
+      {% else %}
+      <div class="verifyResult error">
+        <div class="verifyIcon">&#10007;</div>
+        <h2>Verification Failed</h2>
+        <p>{{ message }}</p>
+        <a href="{{ url_for('auth.register') }}" class="authSubmit secondary" style="display:inline-block; text-decoration:none; text-align:center;">Register Again</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

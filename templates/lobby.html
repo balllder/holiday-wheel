@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel - Room Selection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <header class="top">
+    <h1>Holiday Wheel of Fortune</h1>
+    <div class="topMeta">
+      <span class="muted small">Welcome, <b>{{ user.display_name }}</b></span>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="lobbyMain">
+    <section class="card lobbyCard">
+      <h2>Join a Room</h2>
+
+      <div class="customRoomSection">
+        <div class="row">
+          <input id="customRoomInput" placeholder="Enter room name..." maxlength="32" />
+          <button id="joinCustomBtn" type="button">Join Room</button>
+        </div>
+      </div>
+
+      <div class="roomListSection">
+        <div class="between">
+          <h3>Active Rooms</h3>
+          <button id="refreshRoomsBtn" class="secondary small" type="button">Refresh</button>
+        </div>
+
+        <div id="roomList" class="roomList">
+          <div class="loading">Loading rooms...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='lobby.js') }}"></script>
+</body>
+</html>
