@@ -55,6 +55,6 @@
   <script>
     window.RECAPTCHA_SITE_KEY = "{{ recaptcha_site_key or '' }}";
   </script>
-  <script src="{{ url_for('static', filename='auth.js') }}"></script>
+  <script src="{{ url_for('static', filename='auth.js') }}?v=2"></script>
 </body>
 </html>
