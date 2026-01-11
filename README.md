@@ -67,13 +67,43 @@ Set these environment variables to customize the application:
 | `SECRET_KEY` | Flask session secret key | `dev` |
 | `CORS_ORIGINS` | Comma-separated allowed CORS origins | `*` |
 
+**Email Configuration** (for user registration):
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EMAIL_ENABLED` | Enable email sending | `false` |
+| `SMTP_HOST` | SMTP server hostname | `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP server port | `587` |
+| `SMTP_USER` | SMTP username | - |
+| `SMTP_PASS` | SMTP password | - |
+| `FROM_EMAIL` | Sender email address | `noreply@holidaywheel.com` |
+| `BASE_URL` | Application base URL for email links | `http://localhost:5000` |
+
+When `EMAIL_ENABLED=false`, verification links are printed to the console for development.
+
+## Features
+
+### User Authentication
+
+- **Registration**: Create an account with email and password
+- **Email Verification**: Verify email address before logging in
+- **Persistent Login**: Stay logged in for 30 days with remember-me cookies
+- **Room Lobby**: Browse active rooms or create custom rooms
+- **Player Claiming**: Authenticated users can claim player slots that persist across reconnections
+
+### Wheel Randomization
+
+Wheel wedge positions are randomized each time a new game starts, ensuring variety in gameplay.
+
 ## How to Play
 
-1. Open the app in a browser and enter a room name
-2. One player authenticates as the host using the host code
-3. Host manages the game: starting rounds, selecting players, advancing turns
-4. Players take turns spinning the wheel, guessing letters, and solving puzzles
-5. Buy vowels for a set cost, or solve the puzzle outright when ready
+1. Register an account and verify your email (or play as guest)
+2. Browse available rooms in the lobby or enter a custom room name
+3. Claim a player slot by entering your name
+4. One player authenticates as the host using the host code
+5. Host manages the game: starting rounds, selecting players, advancing turns
+6. Players take turns spinning the wheel, guessing letters, and solving puzzles
+7. Buy vowels for a set cost, or solve the puzzle outright when ready
 
 ### Game Modes
 

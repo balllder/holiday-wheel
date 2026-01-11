@@ -42,29 +42,55 @@ pre-commit install
 
 ## Environment Variables
 
+**Core:**
 - `HOST_CODE`: Host authentication password (default: "holiday")
 - `DB_PATH`: SQLite database path (default: "puzzles.db")
 - `SECRET_KEY`: Flask session secret (default: "dev")
 - `CORS_ORIGINS`: Comma-separated allowed origins (default: "*")
 
+**Email (for user registration):**
+- `EMAIL_ENABLED`: Enable email sending (default: "false")
+- `SMTP_HOST`: SMTP server hostname (default: "smtp.gmail.com")
+- `SMTP_PORT`: SMTP server port (default: "587")
+- `SMTP_USER`: SMTP username
+- `SMTP_PASS`: SMTP password
+- `FROM_EMAIL`: Sender email address (default: "noreply@holidaywheel.com")
+- `BASE_URL`: Application base URL for email links (default: "http://localhost:5000")
+
 ## Architecture
 
 **Backend (app.py)**:
 - Flask + Flask-SocketIO for HTTP and WebSocket handling
-- SQLite database for puzzles, packs, and room configuration
+- SQLite database for puzzles, packs, room configuration, and users
 - In-memory game state stored in `GAMES` dictionary (one `GameState` per room)
-- 14 WebSocket event handlers for real-time game actions
+- 20+ WebSocket event handlers for real-time game actions
+
+**Authentication (auth.py)**:
+- Flask Blueprint at `/auth` prefix
+- User registration with email verification
+- Persistent login with 30-day remember-me cookies
+- Session integration with Socket.IO for player claim persistence
+
+**Supporting Modules**:
+- `db_auth.py`: User database CRUD operations
+- `email_service.py`: SMTP email sending for verification
 
 **Frontend (static/app.js + templates/index.html)**:
 - Vanilla JavaScript with Socket.IO client
 - Reactive UI updates via `state` socket events from server
 - HTML5 canvas for wheel animation
 
+**Auth Frontend (static/auth.js + static/lobby.js)**:
+- Login/register form handling
+- Room lobby with active room browsing
+
 **Database Schema**:
 - `packs`: Puzzle pack collections
 - `puzzles`: Individual puzzles with category, answer, enabled flag, pack_id
 - `used_puzzles`: Tracks per-room puzzle usage to prevent repetition
 - `room_config`: Per-room game settings (vowel cost, jackpot, prize values)
+- `users`: User accounts with email, password hash, verification status
+- `rooms`: Room tracking for lobby (name, activity timestamp, player counts)
 
 ## Game Phases
 
@@ -74,19 +100,30 @@ pre-commit install
 
 ## Code Organization
 
-**app.py** (1,128 lines):
-- Lines 54-331: Database helper functions
-- Lines 336-573: `Player` and `GameState` dataclasses
-- Lines 576-727: Flask app setup and background tasks
-- Lines 729-1077: WebSocket event handlers
-- Lines 1078-1122: REST API for bulk pack import
+**app.py** (~1,450 lines):
+- Lines 1-55: Imports and constants
+- Lines 56-336: Database helper functions (puzzles, packs, config)
+- Lines 338-580: `Player` and `GameState` dataclasses
+- Lines 582-750: Flask app setup, auth registration, background tasks
+- Lines 752-1400: WebSocket event handlers
+- Lines 1402-1450: REST API for bulk pack import
 
-**static/app.js** (728 lines):
+**auth.py** (~235 lines):
+- Authentication blueprint with routes for login, register, verify, logout
+- `login_required` decorator and `get_current_user()` helper
+- Room listing API for lobby
+
+**db_auth.py** (~190 lines):
+- User CRUD: create, get by email/id/token, verify, update login
+- Remember token management for persistent sessions
+- Room activity tracking for lobby
+
+**static/app.js** (~785 lines):
 - Lines 1-100: Initialization and element references
-- Lines 394-450: Puzzle board rendering with word wrapping
-- Lines 452-511: Wheel animation
-- Lines 515-648: Event listeners
-- Lines 649-727: WebSocket event listeners
+- Lines 400-460: Puzzle board rendering with word wrapping
+- Lines 460-520: Wheel animation
+- Lines 520-700: Event listeners
+- Lines 700-785: WebSocket event listeners
 
 ## CI/CD
 
