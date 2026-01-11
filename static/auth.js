@@ -64,22 +64,25 @@ if (registerForm) {
       return;
     }
 
-    // Get reCAPTCHA token if enabled
-    let captchaToken = null;
-    if (window.RECAPTCHA_ENABLED && window.grecaptcha) {
-      captchaToken = grecaptcha.getResponse();
-      if (!captchaToken) {
-        errorEl.textContent = "Please complete the CAPTCHA";
-        errorEl.classList.remove("hidden");
-        return;
-      }
-    }
-
     const submitBtn = registerForm.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
     submitBtn.textContent = "Registering...";
 
     try {
+      // Get reCAPTCHA v3 token if enabled
+      let captchaToken = null;
+      if (window.RECAPTCHA_SITE_KEY && window.grecaptcha) {
+        try {
+          captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: "register" });
+        } catch (captchaErr) {
+          errorEl.textContent = "CAPTCHA error. Please refresh and try again.";
+          errorEl.classList.remove("hidden");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Register";
+          return;
+        }
+      }
+
       const payload = { email, password, display_name: displayName };
       if (captchaToken) {
         payload.captcha_token = captchaToken;
@@ -97,25 +100,14 @@ if (registerForm) {
         successEl.textContent = data.message;
         successEl.classList.remove("hidden");
         registerForm.reset();
-        // Reset reCAPTCHA if present
-        if (window.grecaptcha) {
-          grecaptcha.reset();
-        }
       } else {
         const errors = data.errors || [data.error || "Registration failed"];
         errorEl.textContent = errors.join(", ");
         errorEl.classList.remove("hidden");
-        // Reset reCAPTCHA on error
-        if (window.grecaptcha) {
-          grecaptcha.reset();
-        }
       }
     } catch (err) {
       errorEl.textContent = "Network error. Please try again.";
       errorEl.classList.remove("hidden");
-      if (window.grecaptcha) {
-        grecaptcha.reset();
-      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Register";

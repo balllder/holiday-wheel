@@ -57,9 +57,10 @@ pre-commit install
 - `FROM_EMAIL`: Sender email address (default: "noreply@holidaywheel.com")
 - `BASE_URL`: Application base URL for email links (default: "http://localhost:5000")
 
-**reCAPTCHA (optional):**
-- `RECAPTCHA_SITE_KEY`: Google reCAPTCHA v2 site key
-- `RECAPTCHA_SECRET_KEY`: Google reCAPTCHA v2 secret key
+**reCAPTCHA v3 (optional):**
+- `RECAPTCHA_SITE_KEY`: Google reCAPTCHA v3 site key
+- `RECAPTCHA_SECRET_KEY`: Google reCAPTCHA v3 secret key
+- `RECAPTCHA_MIN_SCORE`: Minimum score threshold (default: 0.5)
 
 ## Architecture
 

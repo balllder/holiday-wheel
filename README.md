@@ -85,10 +85,11 @@ When `EMAIL_ENABLED=false`, verification links are printed to the console for de
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `RECAPTCHA_SITE_KEY` | Google reCAPTCHA v2 site key | - |
-| `RECAPTCHA_SECRET_KEY` | Google reCAPTCHA v2 secret key | - |
+| `RECAPTCHA_SITE_KEY` | Google reCAPTCHA v3 site key | - |
+| `RECAPTCHA_SECRET_KEY` | Google reCAPTCHA v3 secret key | - |
+| `RECAPTCHA_MIN_SCORE` | Minimum score to pass (0.0-1.0) | `0.5` |
 
-When both keys are set, registration requires CAPTCHA verification. Get keys at https://www.google.com/recaptcha/admin
+When both keys are set, registration is protected by invisible reCAPTCHA v3. Get keys at https://www.google.com/recaptcha/admin (select reCAPTCHA v3)
 
 ## Features
 

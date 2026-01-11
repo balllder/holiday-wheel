@@ -585,14 +585,14 @@ input, textarea, select{
   text-decoration:underline;
 }
 
-.captchaGroup{
-  display:flex;
-  justify-content:center;
-  margin:10px 0;
+.recaptchaNotice{
+  text-align:center;
+  margin-top:12px;
+  font-size:12px;
 }
 
-.g-recaptcha{
-  transform-origin:center;
+.recaptchaNotice a{
+  color:var(--muted);
 }
 
 /* Verify result page */

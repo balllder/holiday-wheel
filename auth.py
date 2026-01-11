@@ -114,8 +114,17 @@ def login():
     return response
 
 
-def verify_recaptcha(token: str) -> bool:
-    """Verify reCAPTCHA token with Google."""
+# Minimum score for reCAPTCHA v3 (0.0 = bot, 1.0 = human)
+RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
+
+
+def verify_recaptcha(token: str, expected_action: str = "register") -> bool:
+    """Verify reCAPTCHA v3 token with Google.
+
+    Returns True if:
+    - reCAPTCHA is not configured (RECAPTCHA_SECRET_KEY not set)
+    - Token is valid, action matches, and score meets threshold
+    """
     if not RECAPTCHA_SECRET_KEY:
         return True  # Skip verification if not configured
 
@@ -126,7 +135,17 @@ def verify_recaptcha(token: str) -> bool:
             timeout=10
         )
         result = response.json()
-        return result.get("success", False)
+
+        if not result.get("success", False):
+            return False
+
+        # Check action matches (prevents token reuse across different forms)
+        if result.get("action") != expected_action:
+            return False
+
+        # Check score meets threshold
+        score = result.get("score", 0.0)
+        return score >= RECAPTCHA_MIN_SCORE
     except Exception:
         return False
 

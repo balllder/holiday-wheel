@@ -6,7 +6,7 @@
   <title>Holiday Wheel - Register</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   {% if recaptcha_site_key %}
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
   {% endif %}
 </head>
 <body>
@@ -34,14 +34,16 @@
           <label for="regConfirmPassword">Confirm Password</label>
           <input type="password" id="regConfirmPassword" name="confirm_password" required minlength="8" autocomplete="new-password" />
         </div>
-        {% if recaptcha_site_key %}
-        <div class="formGroup captchaGroup">
-          <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
-        </div>
-        {% endif %}
         <button type="submit" class="authSubmit">Register</button>
         <div id="registerError" class="authError hidden"></div>
         <div id="registerSuccess" class="authSuccess hidden"></div>
+        {% if recaptcha_site_key %}
+        <p class="recaptchaNotice muted small">
+          Protected by reCAPTCHA.
+          <a href="https://policies.google.com/privacy" target="_blank">Privacy</a> &
+          <a href="https://policies.google.com/terms" target="_blank">Terms</a>
+        </p>
+        {% endif %}
       </form>
 
       <div class="authLinks">
@@ -51,7 +53,7 @@
   </div>
 
   <script>
-    window.RECAPTCHA_ENABLED = {{ 'true' if recaptcha_site_key else 'false' }};
+    window.RECAPTCHA_SITE_KEY = "{{ recaptcha_site_key or '' }}";
   </script>
   <script src="{{ url_for('static', filename='auth.js') }}"></script>
 </body>
