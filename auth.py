@@ -118,15 +118,16 @@ def login():
 RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
 
 
-def verify_recaptcha(token: str, expected_action: str = "register") -> bool:
+def verify_recaptcha(token: str, expected_action: str = "register") -> tuple[bool, str]:
     """Verify reCAPTCHA v3 token with Google.
 
-    Returns True if:
-    - reCAPTCHA is not configured (RECAPTCHA_SECRET_KEY not set)
-    - Token is valid, action matches, and score meets threshold
+    Returns (success, error_message) tuple.
     """
     if not RECAPTCHA_SECRET_KEY:
-        return True  # Skip verification if not configured
+        return True, ""  # Skip verification if not configured
+
+    if not token:
+        return False, "No CAPTCHA token provided"
 
     try:
         response = requests.post(
@@ -137,17 +138,22 @@ def verify_recaptcha(token: str, expected_action: str = "register") -> bool:
         result = response.json()
 
         if not result.get("success", False):
-            return False
+            error_codes = result.get("error-codes", [])
+            return False, f"CAPTCHA verification failed: {', '.join(error_codes)}"
 
         # Check action matches (prevents token reuse across different forms)
-        if result.get("action") != expected_action:
-            return False
+        actual_action = result.get("action", "")
+        if actual_action != expected_action:
+            return False, f"CAPTCHA action mismatch (expected: {expected_action}, got: {actual_action})"
 
         # Check score meets threshold
         score = result.get("score", 0.0)
-        return score >= RECAPTCHA_MIN_SCORE
-    except Exception:
-        return False
+        if score < RECAPTCHA_MIN_SCORE:
+            return False, f"CAPTCHA score too low ({score:.2f} < {RECAPTCHA_MIN_SCORE})"
+
+        return True, ""
+    except Exception as e:
+        return False, f"CAPTCHA verification error: {str(e)}"
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -168,10 +174,9 @@ def register():
 
     # Verify reCAPTCHA if configured
     if RECAPTCHA_SECRET_KEY:
-        if not captcha_token:
-            errors.append("Please complete the CAPTCHA")
-        elif not verify_recaptcha(captcha_token):
-            errors.append("CAPTCHA verification failed")
+        captcha_ok, captcha_error = verify_recaptcha(captcha_token)
+        if not captcha_ok:
+            errors.append(captcha_error or "CAPTCHA verification failed")
 
     if not email or not EMAIL_REGEX.match(email):
         errors.append("Valid email is required")
@@ -195,9 +200,19 @@ def register():
     verification_token = secrets.token_urlsafe(32)
     token_expires = int(time.time()) + 86400  # 24 hours
 
-    db_create_user(email, password_hash, display_name, verification_token, token_expires)
+    try:
+        db_create_user(email, password_hash, display_name, verification_token, token_expires)
+    except Exception as e:
+        return jsonify({"ok": False, "errors": [f"Failed to create account: {str(e)}"]}), 500
 
-    send_verification_email(email, verification_token)
+    try:
+        send_verification_email(email, verification_token)
+    except Exception as e:
+        # User was created but email failed - still return success with warning
+        return jsonify({
+            "ok": True,
+            "message": f"Account created but email failed to send: {str(e)}. Contact support."
+        })
 
     return jsonify({
         "ok": True,
