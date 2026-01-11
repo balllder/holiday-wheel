@@ -1,10 +1,12 @@
 """Authentication blueprint for Holiday Wheel."""
 
+import os
 import re
 import secrets
 import time
 from functools import wraps
 
+import requests
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -22,6 +24,10 @@ from db_auth import (
     db_verify_user,
 )
 from email_service import send_verification_email
+
+# reCAPTCHA configuration
+RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "")
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -108,20 +114,45 @@ def login():
     return response
 
 
+def verify_recaptcha(token: str) -> bool:
+    """Verify reCAPTCHA token with Google."""
+    if not RECAPTCHA_SECRET_KEY:
+        return True  # Skip verification if not configured
+
+    try:
+        response = requests.post(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data={"secret": RECAPTCHA_SECRET_KEY, "response": token},
+            timeout=10
+        )
+        result = response.json()
+        return result.get("success", False)
+    except Exception:
+        return False
+
+
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     """Registration page and handler."""
     if request.method == "GET":
         if get_current_user():
             return redirect(url_for("auth.lobby"))
-        return render_template("auth/login.html", show_register=True)
+        return render_template("auth/register.html", recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
     data = request.get_json() if request.is_json else request.form
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
     display_name = (data.get("display_name") or "").strip()
+    captcha_token = data.get("captcha_token") or ""
 
     errors = []
+
+    # Verify reCAPTCHA if configured
+    if RECAPTCHA_SECRET_KEY:
+        if not captcha_token:
+            errors.append("Please complete the CAPTCHA")
+        elif not verify_recaptcha(captcha_token):
+            errors.append("CAPTCHA verification failed")
 
     if not email or not EMAIL_REGEX.match(email):
         errors.append("Valid email is required")

@@ -417,6 +417,10 @@ class GameState:
     final_end_ts: Optional[float] = None
     final_timer_task_running: bool = False
 
+    def __post_init__(self):
+        """Shuffle wheel slots on game creation."""
+        random.shuffle(self.wheel_slots)
+
     def load_config_from_db(self):
         cfg = db_get_room_config(self.room)
         self.vowel_cost = int(cfg["vowel_cost"])

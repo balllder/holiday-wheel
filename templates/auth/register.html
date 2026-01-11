@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel - Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  {% if recaptcha_site_key %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  {% endif %}
+</head>
+<body>
+  <div class="authPage">
+    <div class="authContainer">
+      <h1>Holiday Wheel of Fortune</h1>
+      <h2 class="authSubtitle">Create Account</h2>
+
+      <form id="registerForm" class="authForm">
+        <div class="formGroup">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" name="email" required autocomplete="email" />
+        </div>
+        <div class="formGroup">
+          <label for="regDisplayName">Display Name</label>
+          <input type="text" id="regDisplayName" name="display_name" required minlength="2" maxlength="24" autocomplete="nickname" />
+          <span class="formHint">This will be shown to other players</span>
+        </div>
+        <div class="formGroup">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" name="password" required minlength="8" autocomplete="new-password" />
+          <span class="formHint">At least 8 characters</span>
+        </div>
+        <div class="formGroup">
+          <label for="regConfirmPassword">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" name="confirm_password" required minlength="8" autocomplete="new-password" />
+        </div>
+        {% if recaptcha_site_key %}
+        <div class="formGroup captchaGroup">
+          <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+        </div>
+        {% endif %}
+        <button type="submit" class="authSubmit">Register</button>
+        <div id="registerError" class="authError hidden"></div>
+        <div id="registerSuccess" class="authSuccess hidden"></div>
+      </form>
+
+      <div class="authLinks">
+        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.RECAPTCHA_ENABLED = {{ 'true' if recaptcha_site_key else 'false' }};
+  </script>
+  <script src="{{ url_for('static', filename='auth.js') }}"></script>
+</body>
+</html>

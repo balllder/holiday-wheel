@@ -562,6 +562,39 @@ input, textarea, select{
   font-size:14px;
 }
 
+.authSubtitle{
+  margin:0 0 20px 0;
+  font-size:18px;
+  font-weight:normal;
+  color:var(--muted);
+}
+
+.authLinks{
+  margin-top:20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.authLinks a{
+  color:var(--accent);
+  text-decoration:none;
+}
+
+.authLinks a:hover{
+  text-decoration:underline;
+}
+
+.captchaGroup{
+  display:flex;
+  justify-content:center;
+  margin:10px 0;
+}
+
+.g-recaptcha{
+  transform-origin:center;
+}
+
 /* Verify result page */
 .verifyResult{
   text-align:center;

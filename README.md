@@ -81,6 +81,15 @@ Set these environment variables to customize the application:
 
 When `EMAIL_ENABLED=false`, verification links are printed to the console for development.
 
+**reCAPTCHA Configuration** (optional spam protection):
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `RECAPTCHA_SITE_KEY` | Google reCAPTCHA v2 site key | - |
+| `RECAPTCHA_SECRET_KEY` | Google reCAPTCHA v2 secret key | - |
+
+When both keys are set, registration requires CAPTCHA verification. Get keys at https://www.google.com/recaptcha/admin
+
 ## Features
 
 ### User Authentication
