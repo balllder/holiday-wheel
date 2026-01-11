@@ -1,9 +1,9 @@
 """Authentication database functions for Holiday Wheel."""
 
+import os
 import sqlite3
 import time
-from typing import Optional, List, Dict, Any
-import os
+from typing import Any, Dict, List, Optional
 
 DB_PATH = os.environ.get("DB_PATH", "puzzles.db")
 

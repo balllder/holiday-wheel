@@ -2,8 +2,8 @@
 
 import os
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # Configuration from environment
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")

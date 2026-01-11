@@ -10,6 +10,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Flask, jsonify, render_template, request, session
 from flask_socketio import SocketIO, emit, join_room
 
+from auth import auth_bp, get_current_user
+from db_auth import db_init_auth, db_update_room_activity
+
 
 # Type helper: Flask-SocketIO adds 'sid' attribute to request at runtime
 def _get_sid() -> Optional[str]:
@@ -594,14 +597,11 @@ ASYNC_MODE = os.environ.get("SOCKETIO_ASYNC_MODE", "gevent")
 socketio = SocketIO(app, cors_allowed_origins=cors_allowed, async_mode=ASYNC_MODE)
 
 # Register auth blueprint
-from auth import auth_bp, get_current_user
 app.register_blueprint(auth_bp)
 
 # Initialize databases
 db_init()
 db_seed_defaults_if_empty()
-
-from db_auth import db_init_auth
 db_init_auth()
 
 GAMES: Dict[str, GameState] = {}
@@ -759,7 +759,6 @@ def on_join(data):
     sid = _get_sid()
 
     # Update room activity
-    from db_auth import db_update_room_activity
     db_update_room_activity(room, user_id)
 
     # Auto-restore player claim for authenticated users

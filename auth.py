@@ -1,24 +1,25 @@
 """Authentication blueprint for Holiday Wheel."""
 
+import re
 import secrets
 import time
-import re
 from functools import wraps
-from flask import Blueprint, request, session, redirect, url_for, jsonify, render_template
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from db_auth import (
-    db_user_exists,
+    db_clear_remember_token,
     db_create_user,
     db_get_user_by_email,
     db_get_user_by_id,
-    db_get_user_by_verification_token,
-    db_verify_user,
-    db_update_last_login,
-    db_set_remember_token,
-    db_clear_remember_token,
     db_get_user_by_remember_token,
+    db_get_user_by_verification_token,
     db_list_active_rooms,
+    db_set_remember_token,
+    db_update_last_login,
+    db_user_exists,
+    db_verify_user,
 )
 from email_service import send_verification_email
 
