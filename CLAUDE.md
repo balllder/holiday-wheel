@@ -108,22 +108,43 @@ pre-commit install
 - **Tossup**: Rapid letter reveal - any player can buzz in to solve
 - **Final**: Selected player picks 3 consonants + 1 vowel, then attempts solve
 
+## TV-Authentic UI
+
+**Puzzle Board:**
+- 4-row layout matching TV show: 12, 14, 14, 12 spaces per row
+- Blue board frame with green empty slots
+- White letter tiles with black text when revealed
+- Variable row widths handled by `ROW_WIDTHS` array in app.js
+
+**Wheel:**
+- Authentic color palette defined in `WHEEL_COLORS` array
+- Special wedges evenly distributed via `shuffle_wheel_with_spacing()` in app.py
+- BANKRUPT: black, LOSE A TURN: white, FREE PLAY: neon green, PRIZE: silver
+- Downward-pointing indicator (CSS border-top triangle)
+
+**Authentication:**
+- Login required to access game rooms (`@login_required` decorator on main route)
+- Players must be registered/verified users
+- Player names come from user's `display_name`
+
 ## Code Organization
 
-**app.py** (~1,460 lines):
-- Lines 1-55: Imports and constants
-- Lines 56-336: Database helper functions (puzzles, packs, config)
-- Lines 338-580: `Player` and `GameState` dataclasses (with `__post_init__` for wheel shuffle)
-- Lines 582-750: Flask app setup, auth registration, background tasks
-- Lines 752-1400: WebSocket event handlers
-- Lines 1402-1460: REST API for bulk pack import
+**app.py** (~1,500 lines):
+- Lines 1-55: Imports and constants (including `BASE_WHEEL`)
+- Lines 56-105: `shuffle_wheel_with_spacing()` for even special wedge distribution
+- Lines 106-380: Database helper functions (puzzles, packs, config)
+- Lines 380-620: `Player` and `GameState` dataclasses
+- Lines 620-800: Flask app setup, auth registration, background tasks
+- Lines 800-1450: WebSocket event handlers (including `join_game`, `leave_game`)
+- Lines 1450-1500: REST API for bulk pack import
 
-**auth.py** (~610 lines):
+**auth.py** (~650 lines):
 - Authentication blueprint with routes for login, register, verify, logout
 - `login_required` decorator and `get_current_user()` helper
 - `verify_recaptcha()` for reCAPTCHA v3 score validation
 - Room listing API for lobby
 - Admin routes: user management, pack management, room config
+- Room management: add/remove players, delete rooms
 
 **db_auth.py** (~245 lines):
 - User CRUD: create, get by email/id/token, verify, update login
@@ -131,13 +152,13 @@ pre-commit install
 - Room activity tracking for lobby
 - Admin functions: list all users, delete user, manually verify
 
-**static/app.js** (~730 lines):
-- Lines 1-90: Initialization and element references
-- Lines 320-350: Pack dropdown rendering
-- Lines 350-420: Puzzle board rendering with word wrapping
-- Lines 420-500: Wheel animation
-- Lines 500-690: Event listeners (including join/leave game handlers)
-- Lines 690-730: WebSocket event listeners
+**static/app.js** (~810 lines):
+- Lines 1-125: Initialization, constants (`ROW_WIDTHS`, `WHEEL_COLORS`)
+- Lines 325-355: Pack dropdown rendering
+- Lines 355-445: Puzzle board rendering (4-row TV layout with variable widths)
+- Lines 445-580: Wheel drawing with `getWedgeColor()`, `getTextColor()`, animations
+- Lines 580-700: Event listeners (including join/leave game handlers)
+- Lines 700-810: WebSocket event listeners
 
 **static/auth.js** (~115 lines):
 - Login form handler (if on login page)
