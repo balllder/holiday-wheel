@@ -68,7 +68,8 @@ pre-commit install
 - Flask + Flask-SocketIO for HTTP and WebSocket handling
 - SQLite database for puzzles, packs, room configuration, and users
 - In-memory game state stored in `GAMES` dictionary (one `GameState` per room)
-- 20+ WebSocket event handlers for real-time game actions
+- Dynamic player system: players join/leave games rather than claiming pre-created slots
+- 20+ WebSocket event handlers for real-time game actions (including `join_game`, `leave_game`)
 
 **Authentication (auth.py)**:
 - Flask Blueprint at `/auth` prefix
@@ -77,9 +78,10 @@ pre-commit install
 - Optional reCAPTCHA v3 spam protection (score-based, invisible)
 - Persistent login with 30-day remember-me cookies
 - Session integration with Socket.IO for player claim persistence
+- Host admin page (`/auth/admin`) for managing users, packs, and room config
 
 **Supporting Modules**:
-- `db_auth.py`: User database CRUD operations
+- `db_auth.py`: User database CRUD operations, admin functions
 - `email_service.py`: SMTP email sending for verification
 
 **Frontend (static/app.js + templates/index.html)**:
@@ -87,9 +89,10 @@ pre-commit install
 - Reactive UI updates via `state` socket events from server
 - HTML5 canvas for wheel animation
 
-**Auth Frontend (static/auth.js + static/lobby.js)**:
+**Auth Frontend (static/auth.js + static/lobby.js + static/admin.js)**:
 - Login/register form handling
 - Room lobby with active room browsing
+- Admin panel for user/pack/config management
 
 **Database Schema**:
 - `packs`: Puzzle pack collections
@@ -115,28 +118,37 @@ pre-commit install
 - Lines 752-1400: WebSocket event handlers
 - Lines 1402-1460: REST API for bulk pack import
 
-**auth.py** (~285 lines):
+**auth.py** (~610 lines):
 - Authentication blueprint with routes for login, register, verify, logout
 - `login_required` decorator and `get_current_user()` helper
 - `verify_recaptcha()` for reCAPTCHA v3 score validation
 - Room listing API for lobby
+- Admin routes: user management, pack management, room config
 
-**db_auth.py** (~190 lines):
+**db_auth.py** (~245 lines):
 - User CRUD: create, get by email/id/token, verify, update login
 - Remember token management for persistent sessions
 - Room activity tracking for lobby
+- Admin functions: list all users, delete user, manually verify
 
-**static/app.js** (~785 lines):
-- Lines 1-100: Initialization and element references
-- Lines 400-460: Puzzle board rendering with word wrapping
-- Lines 460-520: Wheel animation
-- Lines 520-700: Event listeners
-- Lines 700-785: WebSocket event listeners
+**static/app.js** (~730 lines):
+- Lines 1-90: Initialization and element references
+- Lines 320-350: Pack dropdown rendering
+- Lines 350-420: Puzzle board rendering with word wrapping
+- Lines 420-500: Wheel animation
+- Lines 500-690: Event listeners (including join/leave game handlers)
+- Lines 690-730: WebSocket event listeners
 
 **static/auth.js** (~115 lines):
 - Login form handler (if on login page)
 - Register form handler with password confirmation validation
 - reCAPTCHA v3 token retrieval via `grecaptcha.execute()`
+
+**static/admin.js** (~525 lines):
+- Host authentication
+- User management (list, verify, delete, resend email)
+- Pack management (list, create, import JSON, delete)
+- Room config (load, save per room)
 
 ## CI/CD
 

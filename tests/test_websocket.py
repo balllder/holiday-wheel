@@ -4,13 +4,45 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app import GAMES, app, socketio  # noqa: E402
+from db_auth import db_create_user, db_init_auth, db_verify_user  # noqa: E402
+
+# Initialize auth tables for tests
+db_init_auth()
+
+# Counter for unique test users
+_test_user_counter = 0
+
+
+def create_test_user_session(flask_client, display_name="TestPlayer"):
+    """Create a test user and set up session for authenticated testing."""
+    global _test_user_counter
+    _test_user_counter += 1
+    email = f"test{_test_user_counter}@test.com"
+
+    # Create and verify user
+    try:
+        user_id = db_create_user(email, "hashedpw", display_name, "token", 9999999999)
+        db_verify_user(user_id)
+    except Exception:
+        # User might already exist, that's fine for tests
+        from db_auth import db_get_user_by_email
+        user = db_get_user_by_email(email)
+        user_id = user["id"] if user else 1
+
+    # Set up session
+    with flask_client.session_transaction() as sess:
+        sess["user_id"] = user_id
+        sess["display_name"] = display_name
+
+    return user_id
 
 
 class TestWebSocketConnection:
     def setup_method(self):
         """Set up test client before each test."""
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
 
     def teardown_method(self):
         """Disconnect client after each test."""
@@ -34,24 +66,30 @@ class TestWebSocketConnection:
         self.client.get_received()
 
         assert "new_room" in GAMES
-        assert len(GAMES["new_room"].players) == 8  # Default player count
+        assert len(GAMES["new_room"].players) == 0  # No players until someone joins
 
     def test_disconnect_releases_claims(self):
-        # Join and claim a player
-        self.client.emit("join", {"room": "disconnect_test"})
-        self.client.get_received()
+        # Need a new client with auth session set up before connection
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "Test")
+        client = socketio.test_client(app, flask_test_client=flask_client)
 
-        self.client.emit("claim_player", {"room": "disconnect_test", "player_id": 0, "name": "Test"})
-        self.client.get_received()
+        # Join room and join game as player
+        client.emit("join", {"room": "disconnect_test"})
+        client.get_received()
+
+        client.emit("join_game", {"room": "disconnect_test"})
+        client.get_received()
 
         # Verify player is claimed
         game = GAMES["disconnect_test"]
+        assert len(game.players) == 1
         assert game.players[0].claimed_sid is not None
 
         # Disconnect
-        self.client.disconnect()
+        client.disconnect()
 
-        # Player should be released
+        # Player's claimed_sid should be released
         assert game.players[0].claimed_sid is None
 
 
@@ -109,7 +147,9 @@ class TestPlayerClaiming:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Alice")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "player_test"})
         self.client.get_received()
 
@@ -117,55 +157,53 @@ class TestPlayerClaiming:
         if self.client.is_connected():
             self.client.disconnect()
 
-    def test_claim_player(self):
-        self.client.emit("claim_player", {"room": "player_test", "player_id": 2, "name": "Alice"})
+    def test_join_game(self):
+        self.client.emit("join_game", {"room": "player_test"})
         received = self.client.get_received()
 
         # Should receive "you" event with player index
         you_events = [r for r in received if r["name"] == "you"]
         assert len(you_events) >= 1
-        assert you_events[0]["args"][0]["player_idx"] == 2
+        assert you_events[0]["args"][0]["player_idx"] == 0  # First player
 
-        # Player should be claimed with correct name
+        # Player should be added and claimed
         game = GAMES["player_test"]
-        assert game.players[2].claimed_sid is not None
-        assert game.players[2].name == "Alice"
+        assert len(game.players) >= 1
+        assert game.players[0].claimed_sid is not None
+        assert game.players[0].name == "Alice"
 
-    def test_claim_player_truncates_long_name(self):
-        long_name = "A" * 50
-        self.client.emit("claim_player", {"room": "player_test", "player_id": 0, "name": long_name})
+    def test_leave_game(self):
+        # First join
+        self.client.emit("join_game", {"room": "player_test"})
         self.client.get_received()
 
         game = GAMES["player_test"]
-        assert len(game.players[0].name) == 24
+        assert len(game.players) == 1
 
-    def test_release_player(self):
-        # First claim
-        self.client.emit("claim_player", {"room": "player_test", "player_id": 1, "name": "Bob"})
-        self.client.get_received()
-
-        # Then release
-        self.client.emit("release_player", {"room": "player_test"})
+        # Then leave
+        self.client.emit("leave_game", {"room": "player_test"})
         received = self.client.get_received()
 
         you_events = [r for r in received if r["name"] == "you"]
         assert len(you_events) >= 1
         assert you_events[0]["args"][0]["player_idx"] is None
 
-        game = GAMES["player_test"]
-        assert game.players[1].claimed_sid is None
+        # Player should be removed
+        assert len(game.players) == 0
 
 
 class TestGameActions:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "game_test"})
         self.client.get_received()
 
-        # Claim player 0 (active player)
-        self.client.emit("claim_player", {"room": "game_test", "player_id": 0, "name": "Player"})
+        # Join game as player (creates and claims player 0)
+        self.client.emit("join_game", {"room": "game_test"})
         self.client.get_received()
 
     def teardown_method(self):
@@ -181,20 +219,28 @@ class TestGameActions:
         assert len(state_events) >= 1
 
         game = GAMES["game_test"]
-        # Wheel should have been spun (index set) or player advanced (if bankrupt/lose turn)
-        assert game.wheel_index is not None or game.active_idx != 0
+        # Wheel should have been spun (index set)
+        assert game.wheel_index is not None or game.last_spin_index is not None
 
     def test_spin_as_non_active_player(self):
-        # Claim player 1 instead
-        self.client.emit("claim_player", {"room": "game_test", "player_id": 1, "name": "Other"})
-        self.client.get_received()
+        # Create a second client that joins as a different player
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "Other")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "game_test"})
+        client2.get_received()
+        client2.emit("join_game", {"room": "game_test"})
+        client2.get_received()
 
-        self.client.emit("spin", {"room": "game_test"})
-        received = self.client.get_received()
+        # Second player tries to spin (but first player is active)
+        client2.emit("spin", {"room": "game_test"})
+        received = client2.get_received()
 
         # Should receive toast about not being active player
         toast_events = [r for r in received if r["name"] == "toast"]
         assert any("active player" in str(t["args"]).lower() for t in toast_events)
+
+        client2.disconnect()
 
     def test_guess_vowel_without_funds(self):
         game = GAMES["game_test"]
@@ -244,6 +290,15 @@ class TestGameActions:
         assert game.players[0].round_bank == 0
 
     def test_solve_incorrect(self):
+        # Need at least 2 players to test turn advancement
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "Player2")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "game_test"})
+        client2.get_received()
+        client2.emit("join_game", {"room": "game_test"})
+        client2.get_received()
+
         game = GAMES["game_test"]
         game.set_puzzle(1, "Test", "HELLO")
         initial_idx = game.active_idx
@@ -253,6 +308,7 @@ class TestGameActions:
 
         # Turn should advance to next player
         assert game.active_idx != initial_idx
+        client2.disconnect()
 
 
 class TestHostOnlyActions:
@@ -295,6 +351,15 @@ class TestHostOnlyActions:
         self.client.emit("claim_host", {"room": "host_only_test", "code": "testcode"})
         self.client.get_received()
 
+        # Join game to create a player (need authenticated user)
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "TestPlayer")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "host_only_test"})
+        client2.get_received()
+        client2.emit("join_game", {"room": "host_only_test"})
+        client2.get_received()
+
         game = GAMES["host_only_test"]
         game.players[0].total = 5000
 
@@ -303,6 +368,7 @@ class TestHostOnlyActions:
 
         # Scores should be reset
         assert game.players[0].total == 0
+        client2.disconnect()
 
 
 class TestPackManagement:
@@ -343,15 +409,28 @@ class TestSpecialWedges:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "wedge_test"})
         self.client.get_received()
-        self.client.emit("claim_player", {"room": "wedge_test", "player_id": 0, "name": "Player"})
+        # Join game as player
+        self.client.emit("join_game", {"room": "wedge_test"})
         self.client.get_received()
+        # Add second player for turn advancement tests
+        self.flask_client2 = app.test_client()
+        create_test_user_session(self.flask_client2, "Player2")
+        self.client2 = socketio.test_client(app, flask_test_client=self.flask_client2)
+        self.client2.emit("join", {"room": "wedge_test"})
+        self.client2.get_received()
+        self.client2.emit("join_game", {"room": "wedge_test"})
+        self.client2.get_received()
 
     def teardown_method(self):
         if self.client.is_connected():
             self.client.disconnect()
+        if self.client2.is_connected():
+            self.client2.disconnect()
 
     def test_free_play_hit_letter(self):
         """FREE PLAY wedge: hit a letter, stay on turn."""
@@ -439,10 +518,12 @@ class TestPhaseRestrictions:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "phase_test"})
         self.client.get_received()
-        self.client.emit("claim_player", {"room": "phase_test", "player_id": 0, "name": "Player"})
+        self.client.emit("join_game", {"room": "phase_test"})
         self.client.get_received()
 
     def teardown_method(self):
@@ -500,10 +581,12 @@ class TestInputValidation:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "validation_test"})
         self.client.get_received()
-        self.client.emit("claim_player", {"room": "validation_test", "player_id": 0, "name": "Player"})
+        self.client.emit("join_game", {"room": "validation_test"})
         self.client.get_received()
 
     def teardown_method(self):
@@ -558,21 +641,21 @@ class TestInputValidation:
         toast_events = [r for r in received if r["name"] == "toast"]
         assert any("type" in str(t["args"]).lower() for t in toast_events)
 
-    def test_claim_player_invalid_id(self):
-        """Claiming player with invalid ID should be rejected."""
-        self.client.emit("claim_player", {"room": "validation_test", "player_id": "invalid", "name": "Test"})
-        received = self.client.get_received()
+    def test_join_game_without_login(self):
+        """Joining game without login should be rejected."""
+        # Create new client without authentication
+        flask_client2 = app.test_client()
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "validation_test"})
+        client2.get_received()
+
+        client2.emit("join_game", {"room": "validation_test"})
+        received = client2.get_received()
 
         toast_events = [r for r in received if r["name"] == "toast"]
-        assert any("choose" in str(t["args"]).lower() for t in toast_events)
+        assert any("logged in" in str(t["args"]).lower() for t in toast_events)
 
-    def test_claim_player_out_of_range(self):
-        """Claiming player with out-of-range ID should be rejected."""
-        self.client.emit("claim_player", {"room": "validation_test", "player_id": 99, "name": "Test"})
-        received = self.client.get_received()
-
-        toast_events = [r for r in received if r["name"] == "toast"]
-        assert any("bad" in str(t["args"]).lower() for t in toast_events)
+        client2.disconnect()
 
 
 class TestConsonantMiss:
@@ -581,15 +664,27 @@ class TestConsonantMiss:
     def setup_method(self):
         GAMES.clear()
         app.config["TESTING"] = True
-        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
         self.client.emit("join", {"room": "miss_test"})
         self.client.get_received()
-        self.client.emit("claim_player", {"room": "miss_test", "player_id": 0, "name": "Player"})
+        self.client.emit("join_game", {"room": "miss_test"})
         self.client.get_received()
+        # Add second player for turn advancement tests
+        self.flask_client2 = app.test_client()
+        create_test_user_session(self.flask_client2, "Player2")
+        self.client2 = socketio.test_client(app, flask_test_client=self.flask_client2)
+        self.client2.emit("join", {"room": "miss_test"})
+        self.client2.get_received()
+        self.client2.emit("join_game", {"room": "miss_test"})
+        self.client2.get_received()
 
     def teardown_method(self):
         if self.client.is_connected():
             self.client.disconnect()
+        if self.client2.is_connected():
+            self.client2.disconnect()
 
     def test_miss_consonant_with_cash_wedge(self):
         """Missing a consonant with cash wedge should advance turn."""

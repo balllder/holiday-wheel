@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Flask, jsonify, render_template, request, session
 from flask_socketio import SocketIO, emit, join_room
 
-from auth import auth_bp, get_current_user
-from db_auth import db_init_auth, db_update_room_activity
+from auth import auth_bp, get_current_user, login_required
+from db_auth import db_get_user_by_id, db_init_auth, db_update_room_activity
 
 
 # Type helper: Flask-SocketIO adds 'sid' attribute to request at runtime
@@ -54,6 +54,52 @@ DEFAULT_PUZZLES: List[Tuple[str, str]] = [
 
 ALPHABET = set(chr(c) for c in range(ord("A"), ord("Z") + 1))
 VOWELS = set("AEIOU")
+
+
+def is_special_wedge(slot: Any) -> bool:
+    """Check if a wedge is a special (non-cash) wedge."""
+    if isinstance(slot, str):
+        return slot in ("BANKRUPT", "LOSE A TURN", "FREE PLAY")
+    if isinstance(slot, dict) and slot.get("type") == "PRIZE":
+        return True
+    return False
+
+
+def shuffle_wheel_with_spacing(slots: List[Any]) -> List[Any]:
+    """Shuffle wheel slots ensuring special wedges are evenly distributed."""
+    special = [s for s in slots if is_special_wedge(s)]
+    cash = [s for s in slots if not is_special_wedge(s)]
+
+    random.shuffle(special)
+    random.shuffle(cash)
+
+    total = len(slots)
+    n_special = len(special)
+
+    if n_special == 0:
+        return cash
+
+    # Calculate spacing between special wedges
+    spacing = total // n_special
+
+    result = [None] * total
+
+    # Place special wedges at evenly spaced positions
+    for i, wedge in enumerate(special):
+        pos = (i * spacing + random.randint(0, max(0, spacing - 2))) % total
+        # Find nearest empty slot if position is taken
+        while result[pos] is not None:
+            pos = (pos + 1) % total
+        result[pos] = wedge
+
+    # Fill remaining slots with cash values
+    cash_idx = 0
+    for i in range(total):
+        if result[i] is None:
+            result[i] = cash[cash_idx]
+            cash_idx += 1
+
+    return result
 
 
 # ----------------------------
@@ -418,8 +464,8 @@ class GameState:
     final_timer_task_running: bool = False
 
     def __post_init__(self):
-        """Shuffle wheel slots on game creation."""
-        random.shuffle(self.wheel_slots)
+        """Shuffle wheel slots on game creation with even spacing for special wedges."""
+        self.wheel_slots = shuffle_wheel_with_spacing(self.wheel_slots)
 
     def load_config_from_db(self):
         cfg = db_get_room_config(self.room)
@@ -443,7 +489,8 @@ class GameState:
     def clear_turn_state(self):
         self.current_wedge = None
         self.wheel_index = None
-        self.last_spin_index = None
+        # Note: last_spin_index is NOT cleared here - it persists to track
+        # where the wheel last landed (used for PRIZE wedge replacement)
 
     def set_puzzle(self, pid: int, category: str, answer: str):
         self.puzzle = {"id": pid, "category": category, "answer": answer.upper()}
@@ -451,6 +498,7 @@ class GameState:
         self.used_letters = set()
         self.reset_round_banks()
         self.clear_turn_state()
+        self.last_spin_index = None
 
     def pick_next_puzzle(self) -> bool:
         row = db_next_unused_puzzle(self.room, self.active_pack_id)
@@ -461,7 +509,9 @@ class GameState:
         self.set_puzzle(pid, row["category"], row["answer"])
         return True
 
-    def active_player(self) -> Player:
+    def active_player(self) -> Optional[Player]:
+        if not self.players:
+            return None
         return self.players[self.active_idx]
 
     def sid_player_idx(self, sid: str) -> Optional[int]:
@@ -510,11 +560,11 @@ class GameState:
             p.round_prizes = []
 
         self.active_idx = 0
-        self.wheel_slots = list(BASE_WHEEL)
-        random.shuffle(self.wheel_slots)
+        self.wheel_slots = shuffle_wheel_with_spacing(list(BASE_WHEEL))
         self.revealed = set()
         self.used_letters = set()
         self.clear_turn_state()
+        self.last_spin_index = None
 
         self.phase = "normal"
         self.tossup_controller_sid = None
@@ -615,7 +665,7 @@ def get_game(room: str) -> GameState:
     room = room or "main"
     if room not in GAMES:
         g = GameState(room=room)
-        g.ensure_players()
+        # Start with empty players - they join dynamically
         g.load_config_from_db()
         if not g.pick_next_puzzle():
             g.set_puzzle(0, "Phrase", "JINGLE ALL THE WAY")
@@ -691,6 +741,7 @@ def broadcast(room: str):
 
 
 @app.get("/")
+@login_required
 def index():
     room = request.args.get("room", "main")
     user = get_current_user()
@@ -935,8 +986,90 @@ def release_player(data):
         broadcast(room)
 
 
+@socketio.on("join_game")
+def join_game(data):
+    """Join the game as a new player (must be logged in)."""
+    room = (data or {}).get("room", "main")
+    user_id = session.get("user_id")
+
+    if not user_id:
+        emit("toast", {"msg": "You must be logged in to join the game."})
+        return
+
+    user = db_get_user_by_id(user_id)
+    if not user:
+        emit("toast", {"msg": "User not found. Please log in again."})
+        return
+
+    name = user["display_name"]
+    g = get_game(room)
+    sid = _get_sid()
+
+    # Check if already in the game (by user_id)
+    for i, p in enumerate(g.players):
+        if p.claimed_user_id == user_id:
+            # Update socket connection
+            p.claimed_sid = sid
+            p.name = name  # Sync name in case it changed
+            join_room(room)
+            emit("you", {"player_idx": i})
+            broadcast(room)
+            return
+
+    # Add new player
+    new_id = len(g.players)
+    g.players.append(Player(
+        id=new_id,
+        name=name,
+        claimed_sid=sid,
+        claimed_user_id=user_id
+    ))
+    join_room(room)
+    emit("you", {"player_idx": new_id})
+    emit("toast", {"msg": f"Joined as {name}!"})
+    broadcast(room)
+
+
+@socketio.on("leave_game")
+def leave_game(data):
+    """Leave the game and remove yourself from the player list."""
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    user_id = session.get("user_id")
+    sid = _get_sid()
+
+    # Find and remove the player
+    player_idx = None
+    for i, p in enumerate(g.players):
+        if p.claimed_sid == sid or (user_id and p.claimed_user_id == user_id):
+            player_idx = i
+            break
+
+    if player_idx is None:
+        emit("toast", {"msg": "You're not in this game."})
+        return
+
+    player_name = g.players[player_idx].name
+    del g.players[player_idx]
+
+    # Update player IDs to be sequential
+    for i, p in enumerate(g.players):
+        p.id = i
+
+    # Adjust active_idx if needed
+    if g.active_idx >= len(g.players):
+        g.active_idx = 0 if g.players else 0
+    elif player_idx < g.active_idx:
+        g.active_idx -= 1
+
+    emit("you", {"player_idx": None})
+    emit("toast", {"msg": f"{player_name} left the game."})
+    broadcast(room)
+
+
 def require_active_player(g: GameState) -> bool:
-    return g.active_player().claimed_sid == _get_sid()
+    p = g.active_player()
+    return p is not None and p.claimed_sid == _get_sid()
 
 
 @socketio.on("load_pack")

@@ -38,7 +38,7 @@
   color:#1a1a2e;
 }
 [data-theme="light"] .pointer{
-  border-bottom-color:rgba(0,0,0,.85);
+  border-top-color:rgba(0,0,0,.85);
 }
 
 *{box-sizing:border-box}
@@ -160,14 +160,14 @@ button:disabled{opacity:.5; cursor:not-allowed}
 }
 .pointer{
   position:absolute;
-  top:-2px;
+  top:-4px;
   left:50%;
   transform:translateX(-50%);
   width:0; height:0;
   border-left:12px solid transparent;
   border-right:12px solid transparent;
-  border-bottom:22px solid rgba(255,255,255,.90);
-  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+  border-top:22px solid rgba(255,255,255,.90);
+  filter:drop-shadow(0 -2px 6px rgba(0,0,0,.35));
 }
 
 .score{margin-top:10px; display:flex; flex-direction:column; gap:6px}
@@ -194,29 +194,43 @@ button:disabled{opacity:.5; cursor:not-allowed}
 
 .boardWrap{margin-top:10px}
 .vannaBoard{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  background:#0066cc;
+  padding:8px;
+  border-radius:12px;
+}
+.vRow{
   display:grid;
-  grid-template-columns: repeat(14, 1fr);
-  gap:6px;
+  gap:4px;
+  justify-content:center;
 }
 .vCell{
-  height:34px;
-  border-radius:10px;
+  height:38px;
+  border-radius:4px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:900;
+  font-size:18px;
   letter-spacing:.5px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.06);
 }
-.vCell.off, .vCell.space{
-  border:none;
-  background:transparent;
+/* Empty slots and spaces - green like real WoF */
+.vCell.empty, .vCell.space{
+  background:#228b22;
+  border:2px solid #1a6b1a;
 }
+/* Hidden letter tile - white, waiting to be revealed */
 .vCell.hiddenTile{
-  color:transparent;
-  background:var(--hidden-tile-bg);
-  border:1px solid var(--hidden-tile-border);
+  background:#ffffff;
+  border:2px solid #cccccc;
+}
+/* Revealed letter tile - white with black text */
+.vCell.revealed{
+  background:#ffffff;
+  border:2px solid #cccccc;
+  color:#000000;
 }
 
 /* FINAL countdown badge centered */
@@ -309,9 +323,9 @@ input, textarea, select{
   max-width:100%;
 }
 .vCell{
-  height:clamp(24px, 7vw, 34px);
-  font-size:clamp(11px, 2.5vw, 14px);
-  border-radius:clamp(6px, 1.5vw, 10px);
+  height:clamp(28px, 7vw, 38px);
+  font-size:clamp(12px, 3vw, 18px);
+  border-radius:clamp(3px, 0.8vw, 4px);
 }
 
 /* Responsive player cards */
@@ -328,11 +342,13 @@ input, textarea, select{
   .card{padding:10px; border-radius:12px}
 
   /* Puzzle board: smaller cells */
-  .vannaBoard{gap:3px}
+  .vannaBoard{gap:3px; padding:6px}
+  .vRow{gap:3px}
   .vCell{
-    height:26px;
+    height:24px;
     font-size:11px;
-    border-radius:6px;
+    border-radius:3px;
+    border-width:1px;
   }
 
   /* Stack controls vertically */
@@ -388,10 +404,11 @@ input, textarea, select{
 
 /* ===== Tablets (480px - 767px) ===== */
 @media (min-width: 480px) and (max-width: 767px) {
-  .vannaBoard{gap:4px}
+  .vannaBoard{gap:4px; padding:6px}
+  .vRow{gap:4px}
   .vCell{
     height:30px;
-    font-size:12px;
+    font-size:14px;
   }
 
   /* Two column player grid */
@@ -411,8 +428,8 @@ input, textarea, select{
 /* ===== Small desktop (768px - 959px) ===== */
 @media (min-width: 768px) and (max-width: 959px) {
   .vCell{
-    height:32px;
-    font-size:13px;
+    height:34px;
+    font-size:16px;
   }
 
   .players{
@@ -697,4 +714,251 @@ input, textarea, select{
 button.small, .small{
   font-size:12px;
   padding:6px 10px;
+}
+
+/* ========== ADMIN STYLES ========== */
+
+.adminPage{
+  min-height:100vh;
+  padding:20px;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+.adminHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:20px;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.adminHeader h1{
+  margin:0;
+}
+
+.adminNav{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.adminNav a{
+  color:var(--text);
+  text-decoration:none;
+  padding:8px 14px;
+  border-radius:8px;
+  background:var(--input-bg);
+  border:1px solid var(--line);
+}
+
+.adminNav a:hover{
+  background:var(--btn2);
+}
+
+.adminMain{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.adminCard{
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
+}
+
+.adminCard h2{
+  margin:0 0 12px 0;
+  font-size:18px;
+}
+
+.adminCard.locked{
+  opacity:.5;
+  pointer-events:none;
+}
+
+.adminStatus{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:14px;
+}
+
+.adminStatus.success{
+  background:rgba(53,255,154,.15);
+  border:1px solid rgba(53,255,154,.4);
+  color:#35ff9a;
+}
+
+.adminStatus.error{
+  background:rgba(255,107,107,.15);
+  border:1px solid rgba(255,107,107,.4);
+  color:#ff6b6b;
+}
+
+.adminStats{
+  display:flex;
+  gap:16px;
+  margin:16px 0;
+  flex-wrap:wrap;
+}
+
+.statBox{
+  flex:1;
+  min-width:100px;
+  background:var(--input-bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  text-align:center;
+}
+
+.statValue{
+  display:block;
+  font-size:28px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.statLabel{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.tableWrap{
+  overflow-x:auto;
+  margin-top:16px;
+}
+
+.adminTable{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+.adminTable th,
+.adminTable td{
+  padding:10px 12px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+}
+
+.adminTable th{
+  font-weight:600;
+  color:var(--muted);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.adminTable tbody tr:hover{
+  background:var(--input-bg);
+}
+
+.adminTable .actions{
+  white-space:nowrap;
+}
+
+.adminTable .actions button,
+.adminTable .actions .button{
+  margin-right:6px;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+}
+
+.badge.success{
+  background:rgba(53,255,154,.15);
+  color:#35ff9a;
+  border:1px solid rgba(53,255,154,.3);
+}
+
+.badge.warning{
+  background:rgba(255,216,107,.15);
+  color:#ffd86b;
+  border:1px solid rgba(255,216,107,.3);
+}
+
+.badge.error{
+  background:rgba(255,107,107,.15);
+  color:#ff6b6b;
+  border:1px solid rgba(255,107,107,.3);
+}
+
+button.danger{
+  background:rgba(255,107,107,.2);
+  border-color:rgba(255,107,107,.4);
+  color:#ff6b6b;
+}
+
+button.danger:hover{
+  background:rgba(255,107,107,.35);
+}
+
+.button{
+  display:inline-block;
+  border:1px solid rgba(255,255,255,.14);
+  background:var(--btn);
+  color:white;
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  font-size:14px;
+}
+
+.button.secondary{
+  background:var(--btn2);
+}
+
+/* Admin responsive */
+@media (max-width: 600px) {
+  .adminPage{
+    padding:12px;
+  }
+
+  .adminHeader{
+    flex-direction:column;
+    align-items:stretch;
+    text-align:center;
+  }
+
+  .adminNav{
+    justify-content:center;
+  }
+
+  .adminCard{
+    padding:14px;
+  }
+
+  .adminStats{
+    flex-direction:column;
+  }
+
+  .statBox{
+    min-width:auto;
+  }
+
+  .adminTable{
+    font-size:12px;
+  }
+
+  .adminTable th,
+  .adminTable td{
+    padding:8px 6px;
+  }
 }

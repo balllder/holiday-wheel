@@ -100,7 +100,18 @@ When both keys are set, registration is protected by invisible reCAPTCHA v3. Get
 - **Spam Protection**: Optional invisible reCAPTCHA v3 on registration
 - **Persistent Login**: Stay logged in for 30 days with remember-me cookies
 - **Room Lobby**: Browse active rooms or create custom rooms
-- **Player Claiming**: Authenticated users can claim player slots that persist across reconnections
+- **Dynamic Players**: Players join games by entering their name; authenticated users' claims persist across reconnections
+
+### Host Admin Panel
+
+A dedicated admin page (`/auth/admin`) for hosts to manage the game outside of active gameplay:
+
+- **User Management**: View all users, verify accounts manually, resend verification emails, delete users
+- **Room Management**: View active rooms with player counts
+- **Puzzle Pack Management**: Create packs from text, import from JSON, delete packs
+- **Room Configuration**: Configure vowel cost, final round settings, prize values, and active pack per room
+
+Access requires logging in and authenticating with the host code.
 
 ### Wheel Randomization
 
@@ -110,7 +121,7 @@ Wheel wedge positions are randomized when a room is created and each time a new 
 
 1. Register an account and verify your email (or play as guest)
 2. Browse available rooms in the lobby or enter a custom room name
-3. Claim a player slot by entering your name
+3. Join the game by entering your name and clicking "Join Game"
 4. One player authenticates as the host using the host code
 5. Host manages the game: starting rounds, selecting players, advancing turns
 6. Players take turns spinning the wheel, guessing letters, and solving puzzles

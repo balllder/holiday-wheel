@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holiday Wheel - Host Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=11" />
+</head>
+<body>
+  <div class="adminPage">
+    <header class="adminHeader">
+      <h1>Host Admin</h1>
+      <div class="adminNav">
+        <a href="{{ url_for('auth.lobby') }}">Lobby</a>
+        <a href="/?room=main">Game</a>
+        <button id="logoutBtn" class="secondary small" type="button">Logout</button>
+      </div>
+    </header>
+
+    <main class="adminMain">
+      <!-- Host Authentication -->
+      <section class="adminCard">
+        <h2>Host Authentication</h2>
+        <p class="muted small">Enter the host code to access admin features.</p>
+        <div class="row">
+          <input type="password" id="hostCode" placeholder="Host code" />
+          <button id="claimHostBtn" type="button">Authenticate</button>
+        </div>
+        <div id="hostStatus" class="adminStatus hidden"></div>
+      </section>
+
+      <!-- User Management -->
+      <section class="adminCard" id="userMgmtSection">
+        <div class="between">
+          <h2>User Management</h2>
+          <button id="refreshUsersBtn" class="secondary small" type="button">Refresh</button>
+        </div>
+
+        <div class="adminStats" id="userStats">
+          <div class="statBox">
+            <span class="statValue" id="totalUsers">-</span>
+            <span class="statLabel">Total Users</span>
+          </div>
+          <div class="statBox">
+            <span class="statValue" id="verifiedUsers">-</span>
+            <span class="statLabel">Verified</span>
+          </div>
+          <div class="statBox">
+            <span class="statValue" id="unverifiedUsers">-</span>
+            <span class="statLabel">Unverified</span>
+          </div>
+        </div>
+
+        <div class="tableWrap">
+          <table class="adminTable" id="usersTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Display Name</th>
+                <th>Verified</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr><td colspan="6" class="muted">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Room Management -->
+      <section class="adminCard" id="roomMgmtSection">
+        <div class="between">
+          <h2>Active Rooms</h2>
+          <button id="refreshRoomsBtn" class="secondary small" type="button">Refresh</button>
+        </div>
+
+        <div class="tableWrap">
+          <table class="adminTable" id="roomsTable">
+            <thead>
+              <tr>
+                <th>Room Name</th>
+                <th>Players</th>
+                <th>Last Activity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="roomsBody">
+              <tr><td colspan="4" class="muted">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Room Player Management -->
+        <div id="roomPlayerMgmt" class="hidden" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+          <div class="between">
+            <h3 style="margin:0;">Manage Room: <span id="selectedRoomName">—</span></h3>
+            <button id="closeRoomMgmt" class="secondary small" type="button">Close</button>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <select id="addPlayerSelect" style="flex:1;">
+              <option value="">Select user to add...</option>
+            </select>
+            <button id="addPlayerBtn" type="button">Add Player</button>
+            <button id="deleteRoomBtn" class="secondary" type="button" style="margin-left:auto;">Delete Room</button>
+          </div>
+
+          <div class="tableWrap" style="margin-top:12px;">
+            <table class="adminTable" id="roomPlayersTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Connected</th>
+                  <th>Total $</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="roomPlayersBody">
+                <tr><td colspan="6" class="muted">Select a room to manage</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Puzzle Pack Management -->
+      <section class="adminCard" id="packMgmtSection">
+        <div class="between">
+          <h2>Puzzle Packs</h2>
+          <button id="refreshPacksBtn" class="secondary small" type="button">Refresh</button>
+        </div>
+
+        <div class="tableWrap">
+          <table class="adminTable" id="packsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Pack Name</th>
+                <th>Puzzles</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="packsBody">
+              <tr><td colspan="4" class="muted">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details style="margin-top:16px;">
+          <summary class="muted">Create New Pack</summary>
+          <div style="margin-top:12px;">
+            <div class="formGroup">
+              <label for="newPackName">Pack Name</label>
+              <input type="text" id="newPackName" placeholder="e.g., EASTER 2026" />
+            </div>
+            <div class="formGroup" style="margin-top:12px;">
+              <label for="newPackPuzzles">Puzzles (one per line: Category | Answer)</label>
+              <textarea id="newPackPuzzles" rows="6" placeholder="FOOD & DRINK | EGGNOG&#10;HOLIDAY TRADITION | DECORATING THE TREE"></textarea>
+            </div>
+            <div class="row" style="margin-top:12px;">
+              <button id="createPackBtn" type="button">Create Pack</button>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-top:12px;">
+          <summary class="muted">Import from JSON</summary>
+          <div style="margin-top:12px;">
+            <p class="muted small">JSON format: {"packs":[{"name":"...","puzzles":[{"category":"...","answer":"..."}]}]}</p>
+            <div class="row">
+              <input type="file" id="packFile" accept="application/json" />
+              <button id="importPackBtn" type="button">Import</button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Room Configuration -->
+      <section class="adminCard" id="configSection">
+        <h2>Room Configuration</h2>
+        <p class="muted small">Configure game settings for a specific room.</p>
+
+        <div class="row" style="margin-top:12px;">
+          <input type="text" id="configRoom" placeholder="Room name (e.g., main)" value="main" />
+          <button id="loadConfigBtn" class="secondary" type="button">Load Config</button>
+        </div>
+
+        <div id="configForm" style="margin-top:16px;">
+          <div class="row">
+            <div style="flex:1; min-width:140px;">
+              <div class="muted small">Vowel Cost ($)</div>
+              <input type="number" id="cfgVowelCost" min="0" step="50" />
+            </div>
+            <div style="flex:1; min-width:140px;">
+              <div class="muted small">Final Seconds</div>
+              <input type="number" id="cfgFinalSeconds" min="5" step="1" />
+            </div>
+            <div style="flex:1; min-width:140px;">
+              <div class="muted small">Final Jackpot ($)</div>
+              <input type="number" id="cfgFinalJackpot" min="0" step="500" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="muted small">Prize Replacement Cash (comma-separated)</div>
+            <input type="text" id="cfgPrizeCash" placeholder="500,1000,1500,2000,2500,3000,3500" style="width:100%;" />
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="muted small">Active Pack for Room</div>
+            <select id="cfgActivePack" style="width:100%;">
+              <option value="">All Packs (no filter)</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <button id="saveConfigBtn" type="button">Save Configuration</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='admin.js') }}?v=3"></script>
+</body>
+</html>

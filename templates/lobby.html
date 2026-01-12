@@ -11,7 +11,10 @@
     <h1>Holiday Wheel of Fortune</h1>
     <div class="topMeta">
       <span class="muted small">Welcome, <b>{{ user.display_name }}</b></span>
-      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="/auth/admin" class="small authLink">Admin</a>
+        <button id="logoutBtn" class="secondary small" type="button">Logout</button>
+      </div>
     </div>
   </header>
 

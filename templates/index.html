@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Holiday Wheel of Fortune</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=10" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=13" />
 </head>
 <body>
   <header class="top">
@@ -15,6 +15,7 @@
         {% if user %}
         <span class="muted small">{{ user.display_name }}</span>
         <a href="/auth/lobby" class="small authLink">Rooms</a>
+        <a href="/auth/admin" class="small authLink">Admin</a>
         <button id="logoutBtn" class="secondary small" type="button">Logout</button>
         {% else %}
         <a href="/auth/login" class="small authLink">Login</a>
@@ -123,14 +124,15 @@
         <div class="muted small" id="hostStatus">Host: —</div>
       </div>
 
-      <div class="row">
-        <input id="myName" placeholder="Your name (for claiming)" style="flex:1; min-width:200px;" />
-        <button id="releasePlayerBtn" class="secondary" type="button">Release Slot</button>
+      <div class="row" style="align-items:center;">
+        <span class="muted small">Playing as: <b>{{ user.display_name }}</b></span>
+        <button id="joinGameBtn" type="button">Join Game</button>
+        <button id="leaveGameBtn" class="secondary" type="button">Leave Game</button>
       </div>
 
       <div class="players" id="players"></div>
 
-      <details style="margin-top:12px;">
+      <details id="hostAdminDetails" class="hidden" style="margin-top:12px;">
         <summary class="muted">Host admin</summary>
 
         <div class="row" style="margin-top:10px;">
@@ -159,31 +161,16 @@
         </div>
 
         <details style="margin-top:10px;">
-          <summary class="muted">Puzzle packs (host)</summary>
-
+          <summary class="muted">Active pack (host)</summary>
           <div class="row" style="margin-top:10px;">
-            <div class="muted small">Active pack for this room:</div>
-            <select id="packSelect" class="select hostOnly">
+            <select id="packSelect" class="select hostOnly" style="flex:1;">
               <option value="">All Packs</option>
             </select>
             <button id="refreshPacksBtn" class="secondary hostOnly" type="button">Refresh</button>
           </div>
-
-          <div class="row" style="margin-top:10px;">
-            <input id="packNameInput" placeholder="Pack name (e.g., EASTER 2026)" style="flex:1; min-width:240px;" />
-          </div>
-
-          <div class="muted small" style="margin-top:6px;">Paste lines: <b>Category | Answer</b></div>
-          <textarea id="packText" rows="7" style="width:100%; margin-top:10px;"></textarea>
-          <div class="row">
-            <button id="loadPackBtn" class="secondary hostOnly" type="button">Save Pack to DB</button>
-          </div>
-        
-          <div class="row" style="margin-top:10px;">
-            <input id="packFile" type="file" accept="application/json" class="hostOnly" />
-            <button id="importPackBtn" class="secondary hostOnly" type="button">Import JSON File</button>
-          </div>
-          <div class="muted small">JSON format: {"packs":[{"name":"...","puzzles":[{"category":"...","answer":"..."}]}]}</div>   
+          <p class="muted small" style="margin-top:8px;">
+            Manage packs and room config in <a href="/auth/admin">Host Admin</a>
+          </p>
         </details>
 
         <details style="margin-top:10px;">
@@ -191,38 +178,6 @@
           <textarea id="prizeNamesText" rows="4" style="width:100%; margin-top:10px;"></textarea>
           <div class="row">
             <button id="setPrizeNamesBtn" class="secondary hostOnly" type="button">Update Prize Names</button>
-          </div>
-        </details>
-
-        <details style="margin-top:10px;">
-          <summary class="muted">Config (host) — saved per room in DB</summary>
-
-          <div class="row" style="margin-top:10px;">
-            <div style="flex:1; min-width:160px;">
-              <div class="muted small">Vowel cost ($)</div>
-              <input id="cfgVowelCost" type="number" min="0" step="50" />
-            </div>
-
-            <div style="flex:1; min-width:160px;">
-              <div class="muted small">Final seconds</div>
-              <input id="cfgFinalSeconds" type="number" min="5" step="1" />
-            </div>
-
-            <div style="flex:1; min-width:160px;">
-              <div class="muted small">Final jackpot ($)</div>
-              <input id="cfgFinalJackpot" type="number" min="0" step="500" />
-            </div>
-          </div>
-
-          <div style="margin-top:10px;">
-            <div class="muted small">Prize replacement cash list (comma-separated)</div>
-            <input id="cfgPrizeCashList" placeholder="500,1000,1500,2000,2500,3000,3500" style="width:100%;" />
-          </div>
-
-          <div class="row">
-            <button id="saveConfigBtn" class="secondary hostOnly" type="button">Save Config</button>
-            <button id="reloadConfigBtn" class="secondary hostOnly" type="button">Reload From DB</button>
-            <span class="muted small" id="cfgSavedAt"></span>
           </div>
         </details>
 
@@ -249,6 +204,6 @@
 
   <script>window.__ROOM__ = "{{ room }}";</script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=10"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=18"></script>
 </body>
 </html>

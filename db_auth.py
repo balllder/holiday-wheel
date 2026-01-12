@@ -188,3 +188,63 @@ def db_update_password(user_id: int, password_hash: str):
             (password_hash, user_id)
         )
         con.commit()
+
+
+# ---- Admin functions ----
+
+def db_list_all_users() -> List[Dict[str, Any]]:
+    """List all users for admin."""
+    with db_connect() as con:
+        rows = con.execute(
+            "SELECT id, email, display_name, verified, created_at, last_login_at FROM users ORDER BY created_at DESC"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def db_get_user_stats() -> Dict[str, int]:
+    """Get user statistics."""
+    with db_connect() as con:
+        total = con.execute("SELECT COUNT(*) as n FROM users").fetchone()["n"]
+        verified = con.execute("SELECT COUNT(*) as n FROM users WHERE verified=1").fetchone()["n"]
+        return {
+            "total": total,
+            "verified": verified,
+            "unverified": total - verified
+        }
+
+
+def db_delete_user(user_id: int) -> bool:
+    """Delete a user by ID. Returns True if deleted."""
+    with db_connect() as con:
+        cursor = con.execute("DELETE FROM users WHERE id=?", (user_id,))
+        con.commit()
+        return cursor.rowcount > 0
+
+
+def db_set_verification_token(user_id: int, token: str, expires: int):
+    """Set new verification token for resending verification email."""
+    with db_connect() as con:
+        con.execute(
+            "UPDATE users SET verification_token=?, verification_token_expires=?, verified=0 WHERE id=?",
+            (token, expires, user_id)
+        )
+        con.commit()
+
+
+def db_manually_verify_user(user_id: int) -> bool:
+    """Manually verify a user without email. Returns True if updated."""
+    with db_connect() as con:
+        cursor = con.execute(
+            "UPDATE users SET verified=1, verification_token=NULL, verification_token_expires=NULL WHERE id=? AND verified=0",
+            (user_id,)
+        )
+        con.commit()
+        return cursor.rowcount > 0
+
+
+def db_delete_room(room_name: str) -> bool:
+    """Delete a room from the database. Returns True if deleted."""
+    with db_connect() as con:
+        cursor = con.execute("DELETE FROM rooms WHERE name=?", (room_name,))
+        con.commit()
+        return cursor.rowcount > 0

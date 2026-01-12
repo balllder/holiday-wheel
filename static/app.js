@@ -19,8 +19,8 @@ const els = {
   hostBanner: el("hostBanner"),
   hostStatus: el("hostStatus"),
 
-  myName: el("myName"),
-  releasePlayerBtn: el("releasePlayerBtn"),
+  joinGameBtn: el("joinGameBtn"),
+  leaveGameBtn: el("leaveGameBtn"),
 
   letterInput: el("letterInput"),
   guessBtn: el("guessBtn"),
@@ -71,23 +71,13 @@ const els = {
   // pack UI
   packSelect: el("packSelect"),
   refreshPacksBtn: el("refreshPacksBtn"),
-  packNameInput: el("packNameInput"),
-  packText: el("packText"),
-  loadPackBtn: el("loadPackBtn"),
 
   prizeNamesText: el("prizeNamesText"),
   setPrizeNamesBtn: el("setPrizeNamesBtn"),
 
-  cfgVowelCost: el("cfgVowelCost"),
-  cfgFinalSeconds: el("cfgFinalSeconds"),
-  cfgFinalJackpot: el("cfgFinalJackpot"),
-  cfgPrizeCashList: el("cfgPrizeCashList"),
-  saveConfigBtn: el("saveConfigBtn"),
-  reloadConfigBtn: el("reloadConfigBtn"),
-  cfgSavedAt: el("cfgSavedAt"),
-
   hostSetActiveSelect: el("hostSetActiveSelect"),
   hostSetActiveBtn: el("hostSetActiveBtn"),
+  hostAdminDetails: el("hostAdminDetails"),
 
   wheel: el("wheel"),
   themeToggle: el("themeToggle"),
@@ -126,7 +116,8 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
 els.roomLabel.textContent = ROOM;
 
 const BOARD_ROWS = 4;
-const BOARD_COLS = 14;
+const ROW_WIDTHS = [12, 14, 14, 12]; // Real Wheel of Fortune layout
+const MAX_ROW_WIDTH = Math.max(...ROW_WIDTHS);
 const VOWELS = new Set(["A","E","I","O","U"]);
 const ALPHA = /^[A-Z]$/;
 
@@ -160,6 +151,10 @@ function normalizeLetter(ch){
 function updateHostUI(){
   if(iAmHost) els.hostBanner.classList.remove("hidden");
   else els.hostBanner.classList.add("hidden");
+
+  // Show/hide host admin section
+  if(iAmHost) els.hostAdminDetails?.classList.remove("hidden");
+  else els.hostAdminDetails?.classList.add("hidden");
 
   const hostButtons = document.querySelectorAll(".hostOnly");
   hostButtons.forEach(btn=>{
@@ -328,59 +323,6 @@ els.finalPickInput?.addEventListener("keydown", (e)=>{
   els.finalPickInput.value = "";
 });
 
-/* ---------- Config UI ---------- */
-function fillConfigUIFromState(){
-  if(!state?.config) return;
-
-  els.cfgVowelCost.value = String(state.config.vowel_cost ?? "");
-  els.cfgFinalSeconds.value = String(state.config.final_seconds ?? "");
-  els.cfgFinalJackpot.value = String(state.config.final_jackpot ?? "");
-  els.cfgPrizeCashList.value = (state.config.prize_replace_cash_values || []).join(",");
-
-  const ts = Number(state.config.updated_at || 0);
-  if (Number.isFinite(ts) && ts > 0) {
-    const d = new Date(ts * 1000);
-    els.cfgSavedAt.textContent = `Saved: ${d.toLocaleString()}`;
-  } else {
-    els.cfgSavedAt.textContent = "";
-  }
-}
-
-function parseCashList(s){
-  const parts = String(s||"").split(",").map(x=>x.trim()).filter(Boolean);
-  return parts.map(p => Number(p)).filter(n => Number.isFinite(n) && n > 0);
-}
-
-els.saveConfigBtn?.addEventListener("click", ()=>{
-  if(!iAmHost) return;
-
-  const vowelCost = Number(els.cfgVowelCost.value);
-  const finalSeconds = Number(els.cfgFinalSeconds.value);
-  const finalJackpot = Number(els.cfgFinalJackpot.value);
-  const cashList = parseCashList(els.cfgPrizeCashList.value);
-
-  if(!Number.isFinite(vowelCost) || vowelCost < 0) return toast("Invalid vowel cost.");
-  if(!Number.isFinite(finalSeconds) || finalSeconds < 5) return toast("Invalid final seconds (>=5).");
-  if(!Number.isFinite(finalJackpot) || finalJackpot < 0) return toast("Invalid final jackpot.");
-  if(!cashList.length) return toast("Prize cash list must have at least one positive number.");
-
-  socket.emit("set_config", {
-    room: ROOM,
-    config: {
-      vowel_cost: vowelCost,
-      final_seconds: finalSeconds,
-      final_jackpot: finalJackpot,
-      prize_replace_cash_values: cashList
-    }
-  });
-  toast("Saving config…");
-});
-
-els.reloadConfigBtn?.addEventListener("click", ()=>{
-  socket.emit("join", { room: ROOM });
-  toast("Reloading…");
-});
-
 /* ---------- Packs UI ---------- */
 function renderPackDropdown(){
   if(!els.packSelect) return;
@@ -410,41 +352,45 @@ els.packSelect?.addEventListener("change", ()=>{
   socket.emit("set_active_pack", { room: ROOM, pack_id: v === "" ? null : Number(v) });
 });
 
-els.loadPackBtn?.addEventListener("click", ()=>{
-  if(!iAmHost) return;
-  const packName = (els.packNameInput.value || "").trim();
-  if(!packName) return toast("Enter a pack name first.");
-  socket.emit("load_pack", { room: ROOM, pack_name: packName, text: els.packText.value || "" });
-  toast("Saving pack…");
-});
 
 /* ---------- Board ---------- */
 function wrapWordsToLines(answer){
   const words = answer.trim().replace(/\s+/g," ").split(" ").filter(Boolean);
   const lines = [];
   let cur = "";
+  let lineIdx = 0;
   for(const w of words){
+    const maxW = ROW_WIDTHS[Math.min(lineIdx, BOARD_ROWS-1)];
     if(!cur){ cur = w; continue; }
-    if(cur.length + 1 + w.length <= BOARD_COLS) cur = cur + " " + w;
-    else { lines.push(cur); cur = w; }
+    if(cur.length + 1 + w.length <= maxW) cur = cur + " " + w;
+    else {
+      lines.push(cur);
+      lineIdx++;
+      cur = w;
+    }
   }
   if(cur) lines.push(cur);
   while(lines.length > BOARD_ROWS){
     const last = lines.pop();
-    lines[lines.length-1] = (lines[lines.length-1] + " " + last).slice(0, BOARD_COLS);
+    const maxW = ROW_WIDTHS[BOARD_ROWS-1];
+    lines[lines.length-1] = (lines[lines.length-1] + " " + last).slice(0, maxW);
   }
   while(lines.length < BOARD_ROWS) lines.push("");
-  return lines.map(l => l.length > BOARD_COLS ? l.slice(0, BOARD_COLS) : l);
+  return lines.map((l, i) => {
+    const maxW = ROW_WIDTHS[i];
+    return l.length > maxW ? l.slice(0, maxW) : l;
+  });
 }
 
 function layoutToGrid(answer){
   const lines = wrapWordsToLines(answer);
   const grid = [];
   for(let r=0;r<BOARD_ROWS;r++){
+    const rowWidth = ROW_WIDTHS[r];
     const line = lines[r];
-    const row = Array.from({length:BOARD_COLS}, ()=>null);
-    const padLeft = Math.max(0, Math.floor((BOARD_COLS - line.length)/2));
-    for(let i=0;i<line.length && (padLeft+i)<BOARD_COLS;i++){
+    const row = Array.from({length:rowWidth}, ()=>null);
+    const padLeft = Math.max(0, Math.floor((rowWidth - line.length)/2));
+    for(let i=0;i<line.length && (padLeft+i)<rowWidth;i++){
       row[padLeft+i] = line[i];
     }
     grid.push(row);
@@ -459,21 +405,40 @@ function renderBoard(){
   els.board.innerHTML = "";
 
   for(let r=0;r<BOARD_ROWS;r++){
-    for(let c=0;c<BOARD_COLS;c++){
+    const rowWidth = ROW_WIDTHS[r];
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "vRow";
+    rowDiv.style.gridTemplateColumns = `repeat(${rowWidth}, 1fr)`;
+
+    for(let c=0;c<rowWidth;c++){
       const v = grid[r][c];
       const cell = document.createElement("div");
       cell.className = "vCell";
 
-      if(v === null) cell.classList.add("off");
-      else if(v === " ") cell.classList.add("space");
-      else if(ALPHA.test(v)){
-        if(!revealed.has(v)) cell.classList.add("hiddenTile");
-        cell.textContent = revealed.has(v) ? v : "";
+      if(v === null){
+        // Empty slot - green background (no puzzle letter here)
+        cell.classList.add("empty");
+      } else if(v === " "){
+        // Space between words - green background
+        cell.classList.add("space");
+      } else if(ALPHA.test(v)){
+        // Letter tile
+        if(revealed.has(v)){
+          // Revealed - white background, black text
+          cell.classList.add("revealed");
+          cell.textContent = v;
+        } else {
+          // Hidden - white background, no text
+          cell.classList.add("hiddenTile");
+        }
       } else {
+        // Punctuation or special characters
+        cell.classList.add("revealed");
         cell.textContent = v;
       }
-      els.board.appendChild(cell);
+      rowDiv.appendChild(cell);
     }
+    els.board.appendChild(rowDiv);
   }
 }
 
@@ -481,6 +446,30 @@ function renderBoard(){
 const ctx = els.wheel.getContext("2d");
 let wheelAngle = 0;
 let wheelAnim = null;
+
+// Authentic Wheel of Fortune TV show colors
+const WHEEL_COLORS = [
+  "#c41e3a", // Cherry Red
+  "#0047ab", // Royal Blue
+  "#ff8c00", // Dark Orange
+  "#ffcc00", // Golden Yellow
+  "#9932cc", // Purple
+  "#ff1493", // Pink
+  "#008b8b", // Teal
+  "#dc143c", // Crimson
+  "#4169e1", // Royal Blue 2
+  "#ff4500", // Orange Red
+  "#32cd32", // Lime Green
+  "#9400d3", // Violet
+  "#ff69b4", // Hot Pink
+  "#1e90ff", // Dodger Blue
+  "#ffd700", // Gold
+  "#00ced1", // Dark Turquoise
+  "#ff6347", // Tomato
+  "#8a2be2", // Blue Violet
+  "#00fa9a", // Medium Spring Green
+  "#ff7f50", // Coral
+];
 
 /* Responsive wheel sizing */
 function resizeWheel(){
@@ -496,7 +485,7 @@ function resizeWheel(){
     // Redraw after resize
     if(state?.wheel_slots){
       const labels = state.wheel_slots.map(labelForSlot);
-      drawWheel(labels);
+      drawWheel(labels, state.wheel_slots);
     }
   }
 }
@@ -507,7 +496,27 @@ window.addEventListener("resize", ()=>{
   resizeTimeout = setTimeout(resizeWheel, 100);
 });
 
-function drawWheel(labels){
+function getWedgeColor(slot, index){
+  // Authentic TV show special wedge colors
+  if(slot === "BANKRUPT") return "#000000"; // Pure Black
+  if(slot === "LOSE A TURN") return "#ffffff"; // White
+  if(slot === "FREE PLAY") return "#39ff14"; // Neon Green (TV show style)
+  if(typeof slot === "object" && slot?.type === "PRIZE") return "#c0c0c0"; // Silver for prize tags
+  // Cycle through colors for cash values
+  return WHEEL_COLORS[index % WHEEL_COLORS.length];
+}
+
+function getTextColor(slot){
+  // Authentic TV show text colors
+  if(slot === "BANKRUPT") return "#c0c0c0"; // Silver text on black
+  if(slot === "LOSE A TURN") return "#000000"; // Black text on white
+  if(slot === "FREE PLAY") return "#003300"; // Dark green text
+  if(typeof slot === "object" && slot?.type === "PRIZE") return "#333333"; // Dark text on silver
+  // White text for all others
+  return "#ffffff";
+}
+
+function drawWheel(labels, slots){
   const n = labels.length || 1;
   const arc = (Math.PI * 2) / n;
   const cx = els.wheel.width/2, cy = els.wheel.height/2;
@@ -519,28 +528,34 @@ function drawWheel(labels){
   for(let i=0;i<n;i++){
     const start = wheelAngle + i*arc;
     const end = start + arc;
+    const slot = slots ? slots[i] : null;
 
     ctx.beginPath();
     ctx.moveTo(cx,cy);
     ctx.arc(cx,cy,radius,start,end);
     ctx.closePath();
-    ctx.fillStyle = i%2===0 ? "rgba(122,162,255,.35)" : "rgba(110,243,197,.25)";
+    ctx.fillStyle = getWedgeColor(slot, i);
     ctx.fill();
-    ctx.strokeStyle="rgba(255,255,255,.12)";
+    ctx.strokeStyle = "rgba(0,0,0,.3)";
+    ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.save();
     ctx.translate(cx,cy);
     ctx.rotate(start+arc/2);
     ctx.textAlign="right";
-    ctx.fillStyle="rgba(233,238,255,.95)";
+    ctx.fillStyle = getTextColor(slot);
     ctx.font=`bold ${fontSize}px system-ui`;
+    ctx.shadowColor = "rgba(0,0,0,.5)";
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
     ctx.fillText(String(labels[i]), radius-12, 5);
     ctx.restore();
   }
 }
 
-function spinToIndex(targetIndex, labels){
+function spinToIndex(targetIndex, labels, slots){
   const n = labels.length;
   if(!n) return;
 
@@ -558,7 +573,7 @@ function spinToIndex(targetIndex, labels){
     const t = Math.min(1, (now - t0) / duration);
     const ease = 1 - Math.pow(1 - t, 3);
     wheelAngle = start + (target - start) * ease;
-    drawWheel(labels);
+    drawWheel(labels, slots);
     if(t < 1) wheelAnim = requestAnimationFrame(step);
   }
   wheelAnim = requestAnimationFrame(step);
@@ -567,9 +582,14 @@ function spinToIndex(targetIndex, labels){
 resizeWheel();
 drawWheel(["…"]);
 
-/* ---------- Players + claiming ---------- */
+/* ---------- Players + joining ---------- */
 function renderPlayers(){
   els.players.innerHTML = "";
+
+  // Update join/leave button visibility
+  const hasJoined = myPlayerIdx !== null;
+  els.joinGameBtn.style.display = hasJoined ? "none" : "";
+  els.leaveGameBtn.style.display = hasJoined ? "" : "none";
 
   if(els.hostSetActiveSelect){
     const cur = els.hostSetActiveSelect.value;
@@ -578,6 +598,11 @@ function renderPlayers(){
     if(cur !== "" && Number(cur) < (state?.players || []).length){
       els.hostSetActiveSelect.value = cur;
     }
+  }
+
+  if ((state?.players || []).length === 0) {
+    els.players.innerHTML = `<div class="muted">No players yet. Click "Join Game" to play!</div>`;
+    return;
   }
 
   (state?.players || []).forEach((p, idx)=>{
@@ -594,27 +619,16 @@ function renderPlayers(){
       : "—";
     const roundVal = p.round_prize_value_total ?? 0;
 
-    const claimedTag = p.claimed ? `<span class="tag">Claimed</span>` : `<span class="tag">Open</span>`;
     const mineTag = (myPlayerIdx === idx) ? `<span class="tag">You</span>` : "";
 
     d.innerHTML = `
       <b>${p.name}${idx===state.active_idx ? " ✅" : ""}</b>
-      <div>${claimedTag} ${mineTag}</div>
+      <div>${mineTag}</div>
       <div class="muted small">Total cash: $${p.total}</div>
       <div class="muted small">Prize value: $${permVal}</div>
       <div class="muted small">Prizes: ${perm}</div>
       <div class="muted small">Round: $${p.round_bank} • Round prizes ($${roundVal}): ${roundPr}</div>
     `;
-
-    const btn = document.createElement("button");
-    btn.className = "secondary";
-    btn.textContent = myPlayerIdx === idx ? "You are this player" : (p.claimed ? "Claim (blocked)" : "Claim this player");
-    btn.disabled = !!p.claimed && myPlayerIdx !== idx;
-    btn.onclick = ()=>{
-      const nm = (els.myName.value || "").trim();
-      socket.emit("claim_player", { room: ROOM, player_id: idx, name: nm });
-    };
-    d.appendChild(btn);
 
     els.players.appendChild(d);
   });
@@ -671,13 +685,18 @@ els.solveBtn.addEventListener("click", ()=>{
   const attempt = (els.solveInput.value || "").trim();
   if(!attempt) return;
   socket.emit("solve", { room: ROOM, attempt });
+  els.solveInput.value = "";
 });
 
 els.letterInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") els.guessBtn.click(); });
 els.solveInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") els.solveBtn.click(); });
 
-els.releasePlayerBtn.addEventListener("click", ()=>{
-  socket.emit("release_player", { room: ROOM });
+els.joinGameBtn.addEventListener("click", ()=>{
+  socket.emit("join_game", { room: ROOM });
+});
+
+els.leaveGameBtn.addEventListener("click", ()=>{
+  socket.emit("leave_game", { room: ROOM });
 });
 
 // host admin
@@ -742,7 +761,14 @@ socket.on("packs", (d)=>{
 
 socket.on("state", (s)=>{
   const prevWheelIndex = state?.wheel_index;
+  const prevPuzzleId = state?.puzzle?.id;
   state = s;
+
+  // Clear guess inputs when puzzle changes
+  if (prevPuzzleId !== undefined && state.puzzle?.id !== prevPuzzleId) {
+    els.letterInput.value = "";
+    els.solveInput.value = "";
+  }
 
   els.phasePill.textContent = (state.phase || "normal").toUpperCase();
 
@@ -765,15 +791,14 @@ socket.on("state", (s)=>{
     ? `• Prizes: ${ap.round_prizes.map(x=>x.name||"PRIZE").join(", ")}`
     : "";
 
-  fillConfigUIFromState();
   renderPackDropdown();
 
   const slots = state.wheel_slots || [];
   const labels = slots.map(labelForSlot);
-  drawWheel(labels);
+  drawWheel(labels, slots);
 
   if (typeof state.wheel_index === "number" && state.wheel_index !== prevWheelIndex) {
-    spinToIndex(state.wheel_index, labels);
+    spinToIndex(state.wheel_index, labels, slots);
   }
 
   renderBoard();

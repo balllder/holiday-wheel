@@ -125,8 +125,11 @@ class TestGameState:
         g = GameState(room="test")
         g.ensure_players()
         g.spin()
-        assert g.wheel_index is not None
+        # last_spin_index is always set after a spin
         assert g.last_spin_index is not None
+        # wheel_index may be None if BANKRUPT/LOSE A TURN was hit (which clears turn state)
+        # So we check that either wheel_index is set OR the turn advanced (for special wedges)
+        assert g.wheel_index is not None or g.active_idx != 0
 
     def test_reset_round_banks(self):
         g = GameState(room="test")
@@ -351,7 +354,8 @@ class TestGameStateAdvanced:
 
         assert g.current_wedge is None
         assert g.wheel_index is None
-        assert g.last_spin_index is None
+        # last_spin_index persists (not cleared) - needed for PRIZE replacement
+        assert g.last_spin_index == 5
 
     def test_reset_game(self):
         g = GameState(room="reset_test")
@@ -548,15 +552,19 @@ class TestPickTvWinnerEdgeCases:
 
 
 class TestFlaskApp:
-    def test_index_route(self):
+    def test_index_route_requires_login(self):
         with app.test_client() as client:
             response = client.get("/")
-            assert response.status_code == 200
+            # Should redirect to login when not authenticated
+            assert response.status_code == 302
+            assert "/auth/login" in response.headers.get("Location", "")
 
-    def test_index_route_with_room(self):
+    def test_index_route_with_room_requires_login(self):
         with app.test_client() as client:
             response = client.get("/?room=testroom")
-            assert response.status_code == 200
+            # Should redirect to login when not authenticated
+            assert response.status_code == 302
+            assert "/auth/login" in response.headers.get("Location", "")
 
 
 class TestGetGameAndSerialize:
@@ -566,11 +574,12 @@ class TestGetGameAndSerialize:
 
         assert g is not None
         assert g.room == "new_game_test"
-        assert len(g.players) == 8
+        assert len(g.players) == 0  # No players until someone joins
         assert "new_game_test" in GAMES
 
     def test_get_game_returns_existing(self):
         g1 = get_game("existing_game_test")
+        g1.ensure_players(default_n=1)  # Create a player for testing
         g1.players[0].total = 9999
         g2 = get_game("existing_game_test")
 
