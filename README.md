@@ -93,39 +93,59 @@ When both keys are set, registration is protected by invisible reCAPTCHA v3. Get
 
 ## Features
 
+### TV-Authentic UI
+
+The game faithfully recreates the look and feel of the TV show:
+
+**Puzzle Board:**
+- 4-row layout matching the TV show (12, 14, 14, 12 spaces)
+- Blue board frame with green empty slots
+- White letter tiles with black text when revealed
+- Automatic word wrapping and centering
+
+**Wheel:**
+- Authentic TV show color palette (red, blue, orange, gold, purple, pink, teal, etc.)
+- Special wedges evenly distributed around the wheel (never clustered)
+- BANKRUPT: black with silver text
+- LOSE A TURN: white with black text
+- FREE PLAY: neon green
+- PRIZE: silver
+- Downward-pointing indicator like the TV show
+
 ### User Authentication
 
-- **Registration**: Dedicated registration page with password confirmation
+- **Required Login**: Users must register and log in to access game rooms
 - **Email Verification**: Verify email address before logging in
 - **Spam Protection**: Optional invisible reCAPTCHA v3 on registration
 - **Persistent Login**: Stay logged in for 30 days with remember-me cookies
 - **Room Lobby**: Browse active rooms or create custom rooms
-- **Dynamic Players**: Players join games by entering their name; authenticated users' claims persist across reconnections
+- **Dynamic Players**: Players join/leave games freely; names come from user accounts
 
 ### Host Admin Panel
 
 A dedicated admin page (`/auth/admin`) for hosts to manage the game outside of active gameplay:
 
 - **User Management**: View all users, verify accounts manually, resend verification emails, delete users
-- **Room Management**: View active rooms with player counts
+- **Room Management**: View active rooms, add/remove players, delete rooms
 - **Puzzle Pack Management**: Create packs from text, import from JSON, delete packs
 - **Room Configuration**: Configure vowel cost, final round settings, prize values, and active pack per room
 
-Access requires logging in and authenticating with the host code.
+Access requires logging in and authenticating with the host code. The in-game host admin section is only visible when host mode is active.
 
 ### Wheel Randomization
 
-Wheel wedge positions are randomized when a room is created and each time a new game starts, ensuring variety in gameplay.
+Wheel wedge positions are randomized when a room is created and each time a new game starts. Special wedges (BANKRUPT, LOSE A TURN, FREE PLAY, PRIZE) are evenly distributed around the wheel to prevent clustering, just like the TV show.
 
 ## How to Play
 
-1. Register an account and verify your email (or play as guest)
-2. Browse available rooms in the lobby or enter a custom room name
-3. Join the game by entering your name and clicking "Join Game"
-4. One player authenticates as the host using the host code
-5. Host manages the game: starting rounds, selecting players, advancing turns
-6. Players take turns spinning the wheel, guessing letters, and solving puzzles
-7. Buy vowels for a set cost, or solve the puzzle outright when ready
+1. Register an account and verify your email
+2. Log in and browse available rooms in the lobby
+3. Join a room or enter a custom room name
+4. Click "Join Game" to become a player (uses your display name)
+5. One player authenticates as the host using the host code (default: `holiday`)
+6. Host manages the game: starting rounds, loading puzzles, advancing turns
+7. Players take turns spinning the wheel, guessing letters, and solving puzzles
+8. Buy vowels for $250, or solve the puzzle outright when ready
 
 ### Game Modes
 
