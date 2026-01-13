@@ -18,6 +18,7 @@ from db_auth import db_get_user_by_id, db_init_auth, db_update_room_activity
 def _get_sid() -> Optional[str]:
     return getattr(request, "sid", None)
 
+
 HOST_CODE = os.environ.get("HOST_CODE", "holiday")
 DB_PATH = os.environ.get("DB_PATH", "puzzles.db")
 
@@ -30,9 +31,20 @@ TOSSUP_AWARD = 1000
 FINAL_RSTLNE = list("RSTLNE")
 
 BASE_WHEEL: List[Any] = [
-    500, 550, 600, 650, 700, 800, 900,
-    300, 350, 400, 450,
-    1000, 1500, 2000,
+    500,
+    550,
+    600,
+    650,
+    700,
+    800,
+    900,
+    300,
+    350,
+    400,
+    450,
+    1000,
+    1500,
+    2000,
     "FREE PLAY",
     {"type": "PRIZE", "name": "GIFT CARD"},
     {"type": "PRIZE", "name": "HOLIDAY MUG"},
@@ -371,16 +383,20 @@ def db_counts(room: str, pack_id: Optional[int]) -> Dict[str, int]:
             used = int(con.execute("SELECT COUNT(*) AS n FROM used_puzzles WHERE room=?", (room,)).fetchone()["n"])
             return {"total": total, "used": used, "unused": total - used}
 
-        total = int(con.execute("SELECT COUNT(*) AS n FROM puzzles WHERE enabled=1 AND pack_id=?", (pack_id,)).fetchone()["n"])
-        used = int(con.execute(
-            """
+        total = int(
+            con.execute("SELECT COUNT(*) AS n FROM puzzles WHERE enabled=1 AND pack_id=?", (pack_id,)).fetchone()["n"]
+        )
+        used = int(
+            con.execute(
+                """
             SELECT COUNT(*) AS n
             FROM used_puzzles u
             JOIN puzzles pu ON pu.id=u.puzzle_id
             WHERE u.room=? AND pu.pack_id=?
             """,
-            (room, pack_id),
-        ).fetchone()["n"])
+                (room, pack_id),
+            ).fetchone()["n"]
+        )
         return {"total": total, "used": used, "unused": total - used}
 
 
@@ -437,7 +453,9 @@ class GameState:
     players: List[Player] = field(default_factory=list)
     active_idx: int = 0
 
-    puzzle: Dict[str, Any] = field(default_factory=lambda: {"id": None, "category": "Phrase", "answer": "JINGLE ALL THE WAY"})
+    puzzle: Dict[str, Any] = field(
+        default_factory=lambda: {"id": None, "category": "Phrase", "answer": "JINGLE ALL THE WAY"}
+    )
     revealed: Set[str] = field(default_factory=set)
     used_letters: Set[str] = field(default_factory=set)
 
@@ -721,7 +739,9 @@ def serialize(g: GameState) -> dict:
         "tossup": {
             "controller_player_idx": controller_idx,
             "locked_player_idxs": [
-                i for i, p in enumerate(g.players) if p.claimed_sid in g.tossup_locked_sids and p.claimed_sid is not None
+                i
+                for i, p in enumerate(g.players)
+                if p.claimed_sid in g.tossup_locked_sids and p.claimed_sid is not None
             ],
             "allowed_player_idxs": list(g.tossup_allowed_player_idxs),
             "is_tiebreaker": bool(g.tossup_is_tiebreaker),
@@ -746,6 +766,14 @@ def index():
     room = request.args.get("room", "main")
     user = get_current_user()
     return render_template("index.html", room=room, user=user)
+
+
+@app.get("/tv/<room>")
+@login_required
+def tv_display(room: str):
+    """TV display page optimized for AppleTV and large screens."""
+    user = get_current_user()
+    return render_template("tv.html", room=room, user=user)
 
 
 def start_tossup_reveal_loop(room: str):
@@ -1018,12 +1046,7 @@ def join_game(data):
 
     # Add new player
     new_id = len(g.players)
-    g.players.append(Player(
-        id=new_id,
-        name=name,
-        claimed_sid=sid,
-        claimed_user_id=user_id
-    ))
+    g.players.append(Player(id=new_id, name=name, claimed_sid=sid, claimed_user_id=user_id))
     join_room(room)
     emit("you", {"player_idx": new_id})
     emit("toast", {"msg": f"Joined as {name}!"})
@@ -1532,12 +1555,15 @@ def set_config(data):
         if isinstance(vals, list):
             g.prize_replace_cash_values = [int(v) for v in vals if isinstance(v, (int, float))]
 
-    db_set_room_config(room, {
-        "vowel_cost": g.vowel_cost,
-        "final_seconds": g.final_seconds,
-        "final_jackpot": g.final_jackpot,
-        "prize_replace_cash_values": g.prize_replace_cash_values,
-    })
+    db_set_room_config(
+        room,
+        {
+            "vowel_cost": g.vowel_cost,
+            "final_seconds": g.final_seconds,
+            "final_jackpot": g.final_jackpot,
+            "prize_replace_cash_values": g.prize_replace_cash_values,
+        },
+    )
     emit("toast", {"msg": "Config saved."})
     broadcast(room)
 
@@ -1587,6 +1613,7 @@ def api_import_packs():
             created_or_updated.append({"name": name, "added": len(lines)})
 
     return jsonify({"ok": True, "total_added": total_added, "packs": created_or_updated})
+
 
 if __name__ == "__main__":
     print(f"DB: {os.path.abspath(DB_PATH)}")
