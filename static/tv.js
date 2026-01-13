@@ -41,7 +41,7 @@ const ALPHA = /^[A-Z]$/;
 let state = null;
 let controlsVisible = false;
 let focusedBtnIdx = 0;
-const navButtons = document.querySelectorAll("[data-nav]");
+let navButtons = []; // Will be populated after DOM ready
 
 // ========== Connection Status ==========
 function setConn(status) {
@@ -447,5 +447,29 @@ socket.on("toast", (data) => {
   console.log("Toast:", data.msg);
 });
 
-// Initialize wheel
-drawWheel(["..."]);
+socket.on("host_claimed", () => {
+  console.log("Host mode active on TV display");
+});
+
+// ========== Initialization ==========
+function init() {
+  // Query nav buttons after DOM is ready
+  navButtons = Array.from(document.querySelectorAll("[data-nav]"));
+  console.log("TV Display initialized, found", navButtons.length, "nav buttons");
+
+  // Initialize wheel
+  drawWheel(["..."]);
+
+  // Auto-claim host with default code (user should already be authenticated)
+  // This allows TV display to control the game
+  setTimeout(() => {
+    socket.emit("claim_host", { room: ROOM, code: "holiday" });
+  }, 500);
+}
+
+// Run init when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
