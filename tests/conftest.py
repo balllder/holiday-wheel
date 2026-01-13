@@ -16,6 +16,7 @@ _test_db.close()
 def reset_games():
     """Reset GAMES dict before each test."""
     from app import GAMES
+
     GAMES.clear()
     yield
     GAMES.clear()

@@ -26,6 +26,7 @@ def create_test_user_session(flask_client, display_name="TestPlayer"):
     except Exception:
         # User might already exist, that's fine for tests
         from db_auth import db_get_user_by_email
+
         user = db_get_user_by_email(email)
         user_id = user["id"] if user else 1
 
@@ -1000,6 +1001,7 @@ class TestHostActions:
     def test_set_active_pack(self):
         """Test setting active pack as host."""
         from app import db_get_pack_id
+
         pack_id = db_get_pack_id("Test Set Pack")
 
         self.client.emit("set_active_pack", {"room": "host_actions_test", "pack_id": pack_id})
@@ -1070,14 +1072,10 @@ class TestHostActions:
 
     def test_set_config(self):
         """Test setting game config."""
-        self.client.emit("set_config", {
-            "room": "host_actions_test",
-            "config": {
-                "vowel_cost": 300,
-                "final_seconds": 45,
-                "final_jackpot": 15000
-            }
-        })
+        self.client.emit(
+            "set_config",
+            {"room": "host_actions_test", "config": {"vowel_cost": 300, "final_seconds": 45, "final_jackpot": 15000}},
+        )
         received = self.client.get_received()
 
         game = GAMES["host_actions_test"]
@@ -1092,9 +1090,25 @@ class TestHostActions:
         game = GAMES["host_actions_test"]
         # Add more players
         game.players = [
-            game.players[0] if game.players else type("Player", (), {"id": 0, "name": "P1", "claimed_sid": None, "total": 0, "round_bank": 0, "prizes": [], "round_prizes": [], "claimed_user_id": None})(),
+            game.players[0]
+            if game.players
+            else type(
+                "Player",
+                (),
+                {
+                    "id": 0,
+                    "name": "P1",
+                    "claimed_sid": None,
+                    "total": 0,
+                    "round_bank": 0,
+                    "prizes": [],
+                    "round_prizes": [],
+                    "claimed_user_id": None,
+                },
+            )(),
         ]
         from app import Player
+
         game.players.append(Player(1, "Player2"))
         game.players.append(Player(2, "Player3"))
 

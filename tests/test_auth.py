@@ -33,15 +33,11 @@ class TestAuthDatabaseFunctions:
         db_init_auth()
         with db_connect() as con:
             # Check users table exists
-            result = con.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
-            ).fetchone()
+            result = con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
             assert result is not None
 
             # Check rooms table exists
-            result = con.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='rooms'"
-            ).fetchone()
+            result = con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='rooms'").fetchone()
             assert result is not None
 
     def test_db_create_user(self):
@@ -130,11 +126,7 @@ class TestAuthRoutes:
     def test_login_missing_fields(self):
         """Test login with missing fields."""
         with app.test_client() as client:
-            response = client.post(
-                "/auth/login",
-                json={"email": ""},
-                content_type="application/json"
-            )
+            response = client.post("/auth/login", json={"email": ""}, content_type="application/json")
             assert response.status_code == 400
             data = response.get_json()
             assert data["ok"] is False
@@ -145,7 +137,7 @@ class TestAuthRoutes:
             response = client.post(
                 "/auth/login",
                 json={"email": "nonexistent@example.com", "password": "wrongpass"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 401
             data = response.get_json()
@@ -158,7 +150,7 @@ class TestAuthRoutes:
             response = client.post(
                 "/auth/register",
                 json={"email": "invalid", "password": "password123", "display_name": "Test"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
 
@@ -166,7 +158,7 @@ class TestAuthRoutes:
             response = client.post(
                 "/auth/register",
                 json={"email": "valid@example.com", "password": "short", "display_name": "Test"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
 
@@ -174,7 +166,7 @@ class TestAuthRoutes:
             response = client.post(
                 "/auth/register",
                 json={"email": "valid@example.com", "password": "password123", "display_name": "X"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
 
@@ -211,17 +203,13 @@ class TestAdminRoutes:
             db_verify_user(user_id)
 
         # Login
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
         # Authenticate as host
         response = client.post(
             "/auth/admin/verify-host",
             json={"code": "testcode"},  # From conftest.py
-            content_type="application/json"
+            content_type="application/json",
         )
         return response
 
@@ -245,15 +233,11 @@ class TestAdminRoutes:
                 db_verify_user(user_id)
 
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             response = client.post(
-                "/auth/admin/verify-host",
-                json={"code": "wrongcode"},
-                content_type="application/json"
+                "/auth/admin/verify-host", json={"code": "wrongcode"}, content_type="application/json"
             )
             assert response.status_code == 401
             data = response.get_json()
@@ -280,9 +264,7 @@ class TestAdminRoutes:
                 db_verify_user(user_id)
 
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             response = client.get("/auth/admin/users")
@@ -389,17 +371,9 @@ class TestAdminPackRoutes:
             user_id = db_create_user(email, password_hash, "Pack Admin", "packtoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_admin_packs_list(self):
         """Test listing packs."""
@@ -419,11 +393,8 @@ class TestAdminPackRoutes:
 
             response = client.post(
                 "/auth/admin/packs",
-                json={
-                    "name": "Test Admin Pack",
-                    "puzzles": "Category One | Answer One\nCategory Two | Answer Two"
-                },
-                content_type="application/json"
+                json={"name": "Test Admin Pack", "puzzles": "Category One | Answer One\nCategory Two | Answer Two"},
+                content_type="application/json",
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -436,9 +407,7 @@ class TestAdminPackRoutes:
             self._get_host_session(client)
 
             response = client.post(
-                "/auth/admin/packs",
-                json={"name": "", "puzzles": "Cat | Ans"},
-                content_type="application/json"
+                "/auth/admin/packs", json={"name": "", "puzzles": "Cat | Ans"}, content_type="application/json"
             )
             assert response.status_code == 400
 
@@ -448,9 +417,7 @@ class TestAdminPackRoutes:
             self._get_host_session(client)
 
             response = client.post(
-                "/auth/admin/packs",
-                json={"name": "Empty Pack", "puzzles": ""},
-                content_type="application/json"
+                "/auth/admin/packs", json={"name": "Empty Pack", "puzzles": ""}, content_type="application/json"
             )
             assert response.status_code == 400
 
@@ -462,7 +429,7 @@ class TestAdminPackRoutes:
             response = client.post(
                 "/auth/admin/packs",
                 json={"name": "Bad Format Pack", "puzzles": "No pipe character"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
 
@@ -475,19 +442,14 @@ class TestAdminPackRoutes:
                 "packs": [
                     {
                         "name": "Import Admin Pack",
-                        "puzzles": [
-                            {"category": "Cat1", "answer": "Ans1"},
-                            {"category": "Cat2", "answer": "Ans2"}
-                        ]
+                        "puzzles": [{"category": "Cat1", "answer": "Ans1"}, {"category": "Cat2", "answer": "Ans2"}],
                     }
                 ]
             }
 
             data = io.BytesIO(json.dumps(payload).encode())
             response = client.post(
-                "/auth/admin/packs/import",
-                data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                "/auth/admin/packs/import", data={"file": (data, "test.json")}, content_type="multipart/form-data"
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -509,9 +471,7 @@ class TestAdminPackRoutes:
 
             data = io.BytesIO(b"not valid json")
             response = client.post(
-                "/auth/admin/packs/import",
-                data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                "/auth/admin/packs/import", data={"file": (data, "test.json")}, content_type="multipart/form-data"
             )
             assert response.status_code == 400
 
@@ -551,17 +511,9 @@ class TestAdminConfigRoutes:
             user_id = db_create_user(email, password_hash, "Config Admin", "configtoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_admin_get_config(self):
         """Test getting room config."""
@@ -586,9 +538,9 @@ class TestAdminConfigRoutes:
                     "vowel_cost": 300,
                     "final_seconds": 45,
                     "final_jackpot": 15000,
-                    "prize_cash_csv": "500,1000,1500"
+                    "prize_cash_csv": "500,1000,1500",
                 },
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -611,7 +563,7 @@ class TestAdminConfigRoutes:
             response = client.post(
                 "/auth/admin/config/test_pack_config_room",
                 json={"active_pack_id": pack_id},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 200
 
@@ -626,9 +578,7 @@ class TestAdminConfigRoutes:
             self._get_host_session(client)
 
             response = client.post(
-                "/auth/admin/config/test_clear_pack_room",
-                json={"active_pack_id": ""},
-                content_type="application/json"
+                "/auth/admin/config/test_clear_pack_room", json={"active_pack_id": ""}, content_type="application/json"
             )
             assert response.status_code == 200
 
@@ -698,11 +648,7 @@ class TestLobbyAndRooms:
             user_id = db_create_user(email, password_hash, "Lobby User", "lobbytoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
     def test_lobby_requires_login(self):
         """Test lobby page requires login."""
@@ -768,17 +714,9 @@ class TestResendVerification:
             user_id = db_create_user(email, password_hash, "Resend Admin", "resendtoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_resend_to_unverified_user(self):
         """Test resending verification to unverified user."""
@@ -845,12 +783,8 @@ class TestFullAuthFlows:
         with app.test_client() as client:
             response = client.post(
                 "/auth/register",
-                json={
-                    "email": email,
-                    "password": "securepass123",
-                    "display_name": "New User"
-                },
-                content_type="application/json"
+                json={"email": email, "password": "securepass123", "display_name": "New User"},
+                content_type="application/json",
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -880,9 +814,7 @@ class TestFullAuthFlows:
 
         with app.test_client() as client:
             response = client.post(
-                "/auth/login",
-                json={"email": email, "password": password},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": password}, content_type="application/json"
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -906,9 +838,7 @@ class TestFullAuthFlows:
 
         with app.test_client() as client:
             response = client.post(
-                "/auth/login",
-                json={"email": email, "password": password},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": password}, content_type="application/json"
             )
             assert response.status_code == 403
             data = response.get_json()
@@ -932,12 +862,8 @@ class TestFullAuthFlows:
         with app.test_client() as client:
             response = client.post(
                 "/auth/register",
-                json={
-                    "email": email,
-                    "password": "newpass123",
-                    "display_name": "Duplicate"
-                },
-                content_type="application/json"
+                json={"email": email, "password": "newpass123", "display_name": "Duplicate"},
+                content_type="application/json",
             )
             assert response.status_code == 409  # Conflict
             data = response.get_json()
@@ -1010,7 +936,7 @@ class TestRememberMeFlow:
             response = client.post(
                 "/auth/login",
                 json={"email": email, "password": password, "remember_me": True},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -1037,7 +963,7 @@ class TestRememberMeFlow:
             response = client.post(
                 "/auth/login",
                 json={"email": email, "password": password, "remember_me": False},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 200
 
@@ -1058,9 +984,9 @@ class TestRegistrationEdgeCases:
                 json={
                     "email": "longname@example.com",
                     "password": "password123",
-                    "display_name": "A" * 30  # 30 chars, limit is 24
+                    "display_name": "A" * 30,  # 30 chars, limit is 24
                 },
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
             data = response.get_json()
@@ -1080,17 +1006,9 @@ class TestAdminRoomManagement:
             user_id = db_create_user(email, password_hash, "Room Admin", "roommgmttoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_admin_delete_room(self):
         """Test deleting a room."""
@@ -1156,9 +1074,7 @@ class TestAdminRoomManagement:
                 user_id = user["id"]
 
             response = client.post(
-                "/auth/admin/rooms/add_player_room/players",
-                json={"user_id": user_id},
-                content_type="application/json"
+                "/auth/admin/rooms/add_player_room/players", json={"user_id": user_id}, content_type="application/json"
             )
             assert response.status_code == 200
             data = response.get_json()
@@ -1173,11 +1089,7 @@ class TestAdminRoomManagement:
         with app.test_client() as client:
             self._get_host_session(client)
 
-            response = client.post(
-                "/auth/admin/rooms/test_room/players",
-                json={},
-                content_type="application/json"
-            )
+            response = client.post("/auth/admin/rooms/test_room/players", json={}, content_type="application/json")
             assert response.status_code == 400
 
     def test_admin_add_player_user_not_found(self):
@@ -1186,9 +1098,7 @@ class TestAdminRoomManagement:
             self._get_host_session(client)
 
             response = client.post(
-                "/auth/admin/rooms/test_room/players",
-                json={"user_id": 99999},
-                content_type="application/json"
+                "/auth/admin/rooms/test_room/players", json={"user_id": 99999}, content_type="application/json"
             )
             assert response.status_code == 404
 
@@ -1214,9 +1124,7 @@ class TestAdminRoomManagement:
             game.players.append(Player(0, "Already", claimed_user_id=user_id))
 
             response = client.post(
-                "/auth/admin/rooms/already_in_room/players",
-                json={"user_id": user_id},
-                content_type="application/json"
+                "/auth/admin/rooms/already_in_room/players", json={"user_id": user_id}, content_type="application/json"
             )
             assert response.status_code == 409
 
@@ -1229,11 +1137,7 @@ class TestAdminRoomManagement:
 
             # Create room with player
             game = get_game("remove_player_room")
-            game.players = [
-                Player(0, "Player 0"),
-                Player(1, "Player To Remove"),
-                Player(2, "Player 2")
-            ]
+            game.players = [Player(0, "Player 0"), Player(1, "Player To Remove"), Player(2, "Player 2")]
 
             response = client.delete("/auth/admin/rooms/remove_player_room/players/1")
             assert response.status_code == 200
@@ -1390,17 +1294,11 @@ class TestAdminDeleteSelf:
         with app.test_client() as client:
             # Login as this user
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             # Authenticate as host
-            client.post(
-                "/auth/admin/verify-host",
-                json={"code": "testcode"},
-                content_type="application/json"
-            )
+            client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
             # Try to delete self
             response = client.delete(f"/auth/admin/users/{user_id}")
@@ -1425,9 +1323,7 @@ class TestLoginRedirectWhenLoggedIn:
         with app.test_client() as client:
             # Login first
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             # Try to access login page
@@ -1449,9 +1345,7 @@ class TestLoginRedirectWhenLoggedIn:
         with app.test_client() as client:
             # Login first
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             # Try to access register page
@@ -1477,9 +1371,7 @@ class TestMeEndpoint:
         with app.test_client() as client:
             # Login
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             # Check /me
@@ -1503,17 +1395,9 @@ class TestAdminConfigInvalidValues:
             user_id = db_create_user(email, password_hash, "Config Invalid", "cfginvtoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_config_invalid_vowel_cost(self):
         """Test setting config with invalid vowel_cost."""
@@ -1523,7 +1407,7 @@ class TestAdminConfigInvalidValues:
             response = client.post(
                 "/auth/admin/config/invalid_config_room",
                 json={"vowel_cost": "not_a_number"},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 400
             data = response.get_json()
@@ -1589,9 +1473,7 @@ class TestIndexRoute:
         with app.test_client() as client:
             # Login
             client.post(
-                "/auth/login",
-                json={"email": email, "password": "testpass123"},
-                content_type="application/json"
+                "/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json"
             )
 
             # Access index with room parameter
@@ -1612,17 +1494,9 @@ class TestAdminVerifyUserEdgeCases:
             user_id = db_create_user(email, password_hash, "Verify Edge", "verifyedgetoken", 9999999999)
             db_verify_user(user_id)
 
-        client.post(
-            "/auth/login",
-            json={"email": email, "password": "testpass123"},
-            content_type="application/json"
-        )
+        client.post("/auth/login", json={"email": email, "password": "testpass123"}, content_type="application/json")
 
-        client.post(
-            "/auth/admin/verify-host",
-            json={"code": "testcode"},
-            content_type="application/json"
-        )
+        client.post("/auth/admin/verify-host", json={"code": "testcode"}, content_type="application/json")
 
     def test_verify_already_verified_user(self):
         """Test verifying an already verified user."""
@@ -1667,7 +1541,7 @@ class TestLogoutClearsRememberToken:
             response = client.post(
                 "/auth/login",
                 json={"email": email, "password": "testpass123", "remember_me": True},
-                content_type="application/json"
+                content_type="application/json",
             )
             assert response.status_code == 200
 

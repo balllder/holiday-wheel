@@ -59,11 +59,7 @@ def db_user_exists(email: str) -> bool:
 
 
 def db_create_user(
-    email: str,
-    password_hash: str,
-    display_name: str,
-    verification_token: str,
-    token_expires: int
+    email: str, password_hash: str, display_name: str, verification_token: str, token_expires: int
 ) -> int:
     """Create a new user and return their ID."""
     now = int(time.time())
@@ -71,7 +67,7 @@ def db_create_user(
         cursor = con.execute(
             """INSERT INTO users (email, password_hash, display_name, verification_token,
                verification_token_expires, created_at) VALUES (?,?,?,?,?,?)""",
-            (email.lower(), password_hash, display_name, verification_token, token_expires, now)
+            (email.lower(), password_hash, display_name, verification_token, token_expires, now),
         )
         con.commit()
         return cursor.lastrowid
@@ -103,7 +99,7 @@ def db_verify_user(user_id: int):
     with db_connect() as con:
         con.execute(
             "UPDATE users SET verified=1, verification_token=NULL, verification_token_expires=NULL WHERE id=?",
-            (user_id,)
+            (user_id,),
         )
         con.commit()
 
@@ -142,8 +138,7 @@ def db_list_active_rooms(hours: int = 24) -> List[Dict[str, Any]]:
     cutoff = int(time.time()) - (hours * 3600)
     with db_connect() as con:
         rows = con.execute(
-            "SELECT * FROM rooms WHERE last_activity_at > ? ORDER BY last_activity_at DESC",
-            (cutoff,)
+            "SELECT * FROM rooms WHERE last_activity_at > ? ORDER BY last_activity_at DESC", (cutoff,)
         ).fetchall()
         return [dict(row) for row in rows]
 
@@ -158,7 +153,7 @@ def db_update_room_activity(room_name: str, user_id: Optional[int] = None):
         else:
             con.execute(
                 "INSERT INTO rooms (name, created_by, created_at, last_activity_at) VALUES (?,?,?,?)",
-                (room_name, user_id, now, now)
+                (room_name, user_id, now, now),
             )
         con.commit()
 
@@ -166,10 +161,7 @@ def db_update_room_activity(room_name: str, user_id: Optional[int] = None):
 def db_set_password_reset_token(user_id: int, token: str, expires: int):
     """Set password reset token for user."""
     with db_connect() as con:
-        con.execute(
-            "UPDATE users SET reset_token=?, reset_token_expires=? WHERE id=?",
-            (token, expires, user_id)
-        )
+        con.execute("UPDATE users SET reset_token=?, reset_token_expires=? WHERE id=?", (token, expires, user_id))
         con.commit()
 
 
@@ -185,12 +177,13 @@ def db_update_password(user_id: int, password_hash: str):
     with db_connect() as con:
         con.execute(
             "UPDATE users SET password_hash=?, reset_token=NULL, reset_token_expires=NULL WHERE id=?",
-            (password_hash, user_id)
+            (password_hash, user_id),
         )
         con.commit()
 
 
 # ---- Admin functions ----
+
 
 def db_list_all_users() -> List[Dict[str, Any]]:
     """List all users for admin."""
@@ -206,11 +199,7 @@ def db_get_user_stats() -> Dict[str, int]:
     with db_connect() as con:
         total = con.execute("SELECT COUNT(*) as n FROM users").fetchone()["n"]
         verified = con.execute("SELECT COUNT(*) as n FROM users WHERE verified=1").fetchone()["n"]
-        return {
-            "total": total,
-            "verified": verified,
-            "unverified": total - verified
-        }
+        return {"total": total, "verified": verified, "unverified": total - verified}
 
 
 def db_delete_user(user_id: int) -> bool:
@@ -226,7 +215,7 @@ def db_set_verification_token(user_id: int, token: str, expires: int):
     with db_connect() as con:
         con.execute(
             "UPDATE users SET verification_token=?, verification_token_expires=?, verified=0 WHERE id=?",
-            (token, expires, user_id)
+            (token, expires, user_id),
         )
         con.commit()
 
@@ -236,7 +225,7 @@ def db_manually_verify_user(user_id: int) -> bool:
     with db_connect() as con:
         cursor = con.execute(
             "UPDATE users SET verified=1, verification_token=NULL, verification_token_expires=NULL WHERE id=? AND verified=0",
-            (user_id,)
+            (user_id,),
         )
         con.commit()
         return cursor.rowcount > 0
