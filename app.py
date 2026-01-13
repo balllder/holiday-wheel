@@ -1532,7 +1532,12 @@ def set_config(data):
         if isinstance(vals, list):
             g.prize_replace_cash_values = [int(v) for v in vals if isinstance(v, (int, float))]
 
-    db_set_room_config(room, g.vowel_cost, g.final_seconds, g.final_jackpot, g.prize_replace_cash_values)
+    db_set_room_config(room, {
+        "vowel_cost": g.vowel_cost,
+        "final_seconds": g.final_seconds,
+        "final_jackpot": g.final_jackpot,
+        "prize_replace_cash_values": g.prize_replace_cash_values,
+    })
     emit("toast", {"msg": "Config saved."})
     broadcast(room)
 

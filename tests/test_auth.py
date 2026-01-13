@@ -989,3 +989,694 @@ class TestRoomActivityDatabase:
             room = rooms[0]
             assert "name" in room
             assert "last_activity_at" in room
+
+
+class TestRememberMeFlow:
+    """Tests for remember-me login flow."""
+
+    def test_login_with_remember_me(self):
+        """Test login with remember_me sets cookie."""
+        db_init_auth()
+        email = "remember_me_test@example.com"
+        password = "testpass123"
+
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash(password)
+            user_id = db_create_user(email, password_hash, "Remember Me", "remtoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            response = client.post(
+                "/auth/login",
+                json={"email": email, "password": password, "remember_me": True},
+                content_type="application/json"
+            )
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+
+            # Check cookie is set
+            cookies = response.headers.getlist("Set-Cookie")
+            remember_cookie = [c for c in cookies if "remember_token" in c]
+            assert len(remember_cookie) >= 1
+
+    def test_login_without_remember_me(self):
+        """Test login without remember_me does not set cookie."""
+        db_init_auth()
+        email = "no_remember_test@example.com"
+        password = "testpass123"
+
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash(password)
+            user_id = db_create_user(email, password_hash, "No Remember", "noremtoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            response = client.post(
+                "/auth/login",
+                json={"email": email, "password": password, "remember_me": False},
+                content_type="application/json"
+            )
+            assert response.status_code == 200
+
+            # Check cookie is NOT set
+            cookies = response.headers.getlist("Set-Cookie")
+            remember_cookie = [c for c in cookies if "remember_token" in c and "max-age" in c.lower()]
+            assert len(remember_cookie) == 0
+
+
+class TestRegistrationEdgeCases:
+    """Tests for registration edge cases."""
+
+    def test_register_display_name_too_long(self):
+        """Test registration fails for display name > 24 chars."""
+        with app.test_client() as client:
+            response = client.post(
+                "/auth/register",
+                json={
+                    "email": "longname@example.com",
+                    "password": "password123",
+                    "display_name": "A" * 30  # 30 chars, limit is 24
+                },
+                content_type="application/json"
+            )
+            assert response.status_code == 400
+            data = response.get_json()
+            assert any("24 characters" in str(e) for e in data.get("errors", []))
+
+
+class TestAdminRoomManagement:
+    """Tests for admin room management routes."""
+
+    def _get_host_session(self, client):
+        """Helper to authenticate as host."""
+        db_init_auth()
+        email = "room_mgmt_admin@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Room Admin", "roommgmttoken", 9999999999)
+            db_verify_user(user_id)
+
+        client.post(
+            "/auth/login",
+            json={"email": email, "password": "testpass123"},
+            content_type="application/json"
+        )
+
+        client.post(
+            "/auth/admin/verify-host",
+            json={"code": "testcode"},
+            content_type="application/json"
+        )
+
+    def test_admin_delete_room(self):
+        """Test deleting a room."""
+        from app import GAMES, get_game
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create a room
+            get_game("room_to_delete")
+            assert "room_to_delete" in GAMES
+
+            response = client.delete("/auth/admin/rooms/room_to_delete")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert "room_to_delete" not in GAMES
+
+    def test_admin_get_room_players(self):
+        """Test getting players in a room."""
+        from app import GAMES, Player, get_game
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create a room with players
+            game = get_game("room_with_players")
+            game.players = [Player(0, "Test Player", claimed_sid="test_sid")]
+
+            response = client.get("/auth/admin/rooms/room_with_players/players")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert len(data["players"]) == 1
+            assert data["players"][0]["name"] == "Test Player"
+
+    def test_admin_get_room_players_nonexistent_room(self):
+        """Test getting players for nonexistent room returns empty list."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.get("/auth/admin/rooms/nonexistent_room/players")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert data["players"] == []
+
+    def test_admin_add_player_to_room(self):
+        """Test adding a player to a room."""
+        from app import GAMES
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create a user to add
+            email = "player_to_add@example.com"
+            user = db_get_user_by_email(email)
+            if not user:
+                password_hash = generate_password_hash("testpass123")
+                user_id = db_create_user(email, password_hash, "Added Player", "addtoken", 9999999999)
+                db_verify_user(user_id)
+            else:
+                user_id = user["id"]
+
+            response = client.post(
+                "/auth/admin/rooms/add_player_room/players",
+                json={"user_id": user_id},
+                content_type="application/json"
+            )
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+
+            # Verify player was added
+            game = GAMES["add_player_room"]
+            assert any(p.claimed_user_id == user_id for p in game.players)
+
+    def test_admin_add_player_no_user_id(self):
+        """Test adding player without user_id fails."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.post(
+                "/auth/admin/rooms/test_room/players",
+                json={},
+                content_type="application/json"
+            )
+            assert response.status_code == 400
+
+    def test_admin_add_player_user_not_found(self):
+        """Test adding nonexistent user fails."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.post(
+                "/auth/admin/rooms/test_room/players",
+                json={"user_id": 99999},
+                content_type="application/json"
+            )
+            assert response.status_code == 404
+
+    def test_admin_add_player_already_in_game(self):
+        """Test adding user already in game fails."""
+        from app import GAMES, Player, get_game
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create user
+            email = "already_in_game@example.com"
+            user = db_get_user_by_email(email)
+            if not user:
+                password_hash = generate_password_hash("testpass123")
+                user_id = db_create_user(email, password_hash, "Already In", "alreadytoken", 9999999999)
+                db_verify_user(user_id)
+            else:
+                user_id = user["id"]
+
+            # Add player to game
+            game = get_game("already_in_room")
+            game.players.append(Player(0, "Already", claimed_user_id=user_id))
+
+            response = client.post(
+                "/auth/admin/rooms/already_in_room/players",
+                json={"user_id": user_id},
+                content_type="application/json"
+            )
+            assert response.status_code == 409
+
+    def test_admin_remove_player_from_room(self):
+        """Test removing a player from a room."""
+        from app import GAMES, Player, get_game
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create room with player
+            game = get_game("remove_player_room")
+            game.players = [
+                Player(0, "Player 0"),
+                Player(1, "Player To Remove"),
+                Player(2, "Player 2")
+            ]
+
+            response = client.delete("/auth/admin/rooms/remove_player_room/players/1")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert len(game.players) == 2
+            assert all(p.name != "Player To Remove" for p in game.players)
+
+    def test_admin_remove_player_room_not_found(self):
+        """Test removing player from nonexistent room fails."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.delete("/auth/admin/rooms/nonexistent/players/0")
+            assert response.status_code == 404
+
+    def test_admin_remove_player_invalid_index(self):
+        """Test removing player with invalid index fails."""
+        from app import get_game
+
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            get_game("invalid_idx_room")
+
+            response = client.delete("/auth/admin/rooms/invalid_idx_room/players/99")
+            assert response.status_code == 400
+
+    def test_admin_get_available_users(self):
+        """Test getting available users for a room."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.get("/auth/admin/users/available/some_room")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert "users" in data
+
+
+class TestDbAuthFunctions:
+    """Tests for db_auth.py functions not covered elsewhere."""
+
+    def test_db_set_remember_token(self):
+        """Test setting remember token."""
+        from db_auth import db_set_remember_token, db_get_user_by_remember_token
+
+        db_init_auth()
+        email = "set_remember@example.com"
+        password_hash = generate_password_hash("testpass123")
+        user_id = db_create_user(email, password_hash, "Set Remember", "setremtoken", 9999999999)
+
+        # Set remember token
+        db_set_remember_token(user_id, "my_remember_token_123")
+
+        # Verify we can find user by token
+        user = db_get_user_by_remember_token("my_remember_token_123")
+        assert user is not None
+        assert user["id"] == user_id
+
+        # Cleanup
+        db_delete_user(user_id)
+
+    def test_db_clear_remember_token(self):
+        """Test clearing remember token."""
+        from db_auth import db_clear_remember_token, db_get_user_by_remember_token, db_set_remember_token
+
+        db_init_auth()
+        email = "clear_remember@example.com"
+        password_hash = generate_password_hash("testpass123")
+        user_id = db_create_user(email, password_hash, "Clear Remember", "clrremtoken", 9999999999)
+
+        # Set then clear
+        db_set_remember_token(user_id, "token_to_clear")
+        db_clear_remember_token(user_id)
+
+        # Should not find user by token anymore
+        user = db_get_user_by_remember_token("token_to_clear")
+        assert user is None
+
+        # Cleanup
+        db_delete_user(user_id)
+
+    def test_db_password_reset_token(self):
+        """Test password reset token functions."""
+        from db_auth import db_get_user_by_reset_token, db_set_password_reset_token, db_update_password
+
+        db_init_auth()
+        email = "reset_pw@example.com"
+        password_hash = generate_password_hash("oldpass123")
+        user_id = db_create_user(email, password_hash, "Reset PW", "resetpwtoken", 9999999999)
+
+        # Set reset token
+        db_set_password_reset_token(user_id, "reset_token_abc", 9999999999)
+
+        # Find by reset token
+        user = db_get_user_by_reset_token("reset_token_abc")
+        assert user is not None
+        assert user["id"] == user_id
+
+        # Update password
+        new_hash = generate_password_hash("newpass456")
+        db_update_password(user_id, new_hash)
+
+        # Reset token should be cleared
+        user = db_get_user_by_reset_token("reset_token_abc")
+        assert user is None
+
+        # Cleanup
+        db_delete_user(user_id)
+
+    def test_db_delete_room(self):
+        """Test deleting a room from database."""
+        from db_auth import db_delete_room
+
+        db_init_auth()
+        room_name = "room_to_db_delete"
+
+        # Create room
+        db_update_room_activity(room_name)
+
+        # Verify it exists
+        rooms = db_list_active_rooms(hours=1)
+        assert room_name in [r["name"] for r in rooms]
+
+        # Delete
+        result = db_delete_room(room_name)
+        assert result is True
+
+        # Verify deleted
+        rooms = db_list_active_rooms(hours=1)
+        assert room_name not in [r["name"] for r in rooms]
+
+        # Deleting again should return False
+        result = db_delete_room(room_name)
+        assert result is False
+
+
+class TestAdminDeleteSelf:
+    """Test admin cannot delete themselves."""
+
+    def test_admin_cannot_delete_self(self):
+        """Test that admin cannot delete their own account."""
+        db_init_auth()
+        email = "self_delete@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Self Delete", "selfdeltoken", 9999999999)
+            db_verify_user(user_id)
+        else:
+            user_id = user["id"]
+
+        with app.test_client() as client:
+            # Login as this user
+            client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123"},
+                content_type="application/json"
+            )
+
+            # Authenticate as host
+            client.post(
+                "/auth/admin/verify-host",
+                json={"code": "testcode"},
+                content_type="application/json"
+            )
+
+            # Try to delete self
+            response = client.delete(f"/auth/admin/users/{user_id}")
+            assert response.status_code == 400
+            data = response.get_json()
+            assert "cannot delete yourself" in data["error"].lower()
+
+
+class TestLoginRedirectWhenLoggedIn:
+    """Test login page redirects when already logged in."""
+
+    def test_login_page_redirects_when_logged_in(self):
+        """Test GET /auth/login redirects to lobby when already logged in."""
+        db_init_auth()
+        email = "logged_in_redirect@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Redirect Test", "redirecttoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            # Login first
+            client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123"},
+                content_type="application/json"
+            )
+
+            # Try to access login page
+            response = client.get("/auth/login")
+            # Should redirect to lobby
+            assert response.status_code == 302
+            assert "lobby" in response.location
+
+    def test_register_page_redirects_when_logged_in(self):
+        """Test GET /auth/register redirects to lobby when already logged in."""
+        db_init_auth()
+        email = "register_redirect@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Register Redirect", "regreditoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            # Login first
+            client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123"},
+                content_type="application/json"
+            )
+
+            # Try to access register page
+            response = client.get("/auth/register")
+            # Should redirect to lobby
+            assert response.status_code == 302
+            assert "lobby" in response.location
+
+
+class TestMeEndpoint:
+    """Test /auth/me endpoint when logged in."""
+
+    def test_me_logged_in(self):
+        """Test /auth/me returns user info when logged in."""
+        db_init_auth()
+        email = "me_endpoint@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Me Test", "metoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            # Login
+            client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123"},
+                content_type="application/json"
+            )
+
+            # Check /me
+            response = client.get("/auth/me")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert data["user"]["email"] == email
+            assert data["user"]["display_name"] == "Me Test"
+
+
+class TestAdminConfigInvalidValues:
+    """Test admin config with invalid values."""
+
+    def _get_host_session(self, client):
+        db_init_auth()
+        email = "config_invalid@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Config Invalid", "cfginvtoken", 9999999999)
+            db_verify_user(user_id)
+
+        client.post(
+            "/auth/login",
+            json={"email": email, "password": "testpass123"},
+            content_type="application/json"
+        )
+
+        client.post(
+            "/auth/admin/verify-host",
+            json={"code": "testcode"},
+            content_type="application/json"
+        )
+
+    def test_config_invalid_vowel_cost(self):
+        """Test setting config with invalid vowel_cost."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            response = client.post(
+                "/auth/admin/config/invalid_config_room",
+                json={"vowel_cost": "not_a_number"},
+                content_type="application/json"
+            )
+            assert response.status_code == 400
+            data = response.get_json()
+            assert data["ok"] is False
+
+
+class TestRememberTokenRestore:
+    """Test remember token session restoration."""
+
+    def test_restore_session_from_remember_token(self):
+        """Test that remember_token cookie restores session."""
+        from db_auth import db_set_remember_token
+
+        db_init_auth()
+        email = "remember_restore@example.com"
+        password = "testpass123"
+        remember_token = "test_remember_token_restore_123"
+
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash(password)
+            user_id = db_create_user(email, password_hash, "Remember Restore", "rr_token", 9999999999)
+            db_verify_user(user_id)
+        else:
+            user_id = user["id"]
+
+        # Set remember token
+        db_set_remember_token(user_id, remember_token)
+
+        with app.test_client() as client:
+            # Set cookie manually
+            client.set_cookie("remember_token", remember_token)
+
+            # Access /auth/me - should restore session
+            response = client.get("/auth/me")
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["ok"] is True
+            assert data["user"]["email"] == email
+
+
+class TestIndexRoute:
+    """Test the main index route."""
+
+    def test_index_requires_login(self):
+        """Test main index route requires login."""
+        with app.test_client() as client:
+            response = client.get("/")
+            # Should redirect to login
+            assert response.status_code == 302
+            assert "login" in response.location
+
+    def test_index_renders_for_logged_in_user(self):
+        """Test main index renders game for logged in user."""
+        db_init_auth()
+        email = "index_test@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Index Test", "indextoken", 9999999999)
+            db_verify_user(user_id)
+
+        with app.test_client() as client:
+            # Login
+            client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123"},
+                content_type="application/json"
+            )
+
+            # Access index with room parameter
+            response = client.get("/?room=test_index_room")
+            assert response.status_code == 200
+            assert b"Wheel" in response.data or b"game" in response.data.lower()
+
+
+class TestAdminVerifyUserEdgeCases:
+    """Test admin verify user edge cases."""
+
+    def _get_host_session(self, client):
+        db_init_auth()
+        email = "verify_edge_admin@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Verify Edge", "verifyedgetoken", 9999999999)
+            db_verify_user(user_id)
+
+        client.post(
+            "/auth/login",
+            json={"email": email, "password": "testpass123"},
+            content_type="application/json"
+        )
+
+        client.post(
+            "/auth/admin/verify-host",
+            json={"code": "testcode"},
+            content_type="application/json"
+        )
+
+    def test_verify_already_verified_user(self):
+        """Test verifying an already verified user."""
+        with app.test_client() as client:
+            self._get_host_session(client)
+
+            # Create and verify user
+            db_init_auth()
+            email = "already_ver@example.com"
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Already Ver", "alreadyvertoken", 9999999999)
+            db_verify_user(user_id)
+
+            response = client.post(f"/auth/admin/users/{user_id}/verify")
+            # Returns 404 with "User not found or already verified"
+            assert response.status_code == 404
+            data = response.get_json()
+            assert "already verified" in data["error"].lower()
+
+            # Cleanup
+            db_delete_user(user_id)
+
+
+class TestLogoutClearsRememberToken:
+    """Test that logout clears remember token."""
+
+    def test_logout_clears_remember_cookie(self):
+        """Test logout clears the remember_token cookie."""
+        from db_auth import db_set_remember_token
+
+        db_init_auth()
+        email = "logout_clear@example.com"
+        user = db_get_user_by_email(email)
+        if not user:
+            password_hash = generate_password_hash("testpass123")
+            user_id = db_create_user(email, password_hash, "Logout Clear", "logoutclrtoken", 9999999999)
+            db_verify_user(user_id)
+        else:
+            user_id = user["id"]
+
+        with app.test_client() as client:
+            # Login with remember me
+            response = client.post(
+                "/auth/login",
+                json={"email": email, "password": "testpass123", "remember_me": True},
+                content_type="application/json"
+            )
+            assert response.status_code == 200
+
+            # Logout
+            response = client.post("/auth/logout")
+            assert response.status_code == 200
+
+            # Check /me - should not be logged in
+            response = client.get("/auth/me")
+            data = response.get_json()
+            assert data["ok"] is False

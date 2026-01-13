@@ -712,3 +712,834 @@ class TestConsonantMiss:
 
         # L appears 2 times in HELLO, so 500 * 2 = 1000
         assert game.players[0].round_bank == 1000
+
+
+class TestTossupPhase:
+    """Tests for tossup phase handlers."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "Player1")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
+        self.client.emit("join", {"room": "tossup_test"})
+        self.client.get_received()
+        # Claim host
+        self.client.emit("claim_host", {"room": "tossup_test", "code": "testcode"})
+        self.client.get_received()
+        # Join game
+        self.client.emit("join_game", {"room": "tossup_test"})
+        self.client.get_received()
+
+    def teardown_method(self):
+        if self.client.is_connected():
+            self.client.disconnect()
+
+    def test_start_tossup(self):
+        """Test starting a tossup round."""
+        self.client.emit("start_tossup", {"room": "tossup_test"})
+        received = self.client.get_received()
+
+        game = GAMES["tossup_test"]
+        assert game.phase == "tossup"
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("toss-up started" in str(t["args"]).lower() for t in toast_events)
+
+    def test_end_tossup(self):
+        """Test ending a tossup round."""
+        game = GAMES["tossup_test"]
+        game.phase = "tossup"
+
+        self.client.emit("end_tossup", {"room": "tossup_test"})
+        self.client.get_received()
+
+        assert game.phase == "normal"
+
+    def test_buzz_during_tossup(self):
+        """Test buzzing in during tossup."""
+        game = GAMES["tossup_test"]
+        game.phase = "tossup"
+        game.tossup_controller_sid = None
+
+        self.client.emit("buzz", {"room": "tossup_test"})
+        received = self.client.get_received()
+
+        assert game.tossup_controller_sid is not None
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("buzzed in" in str(t["args"]).lower() for t in toast_events)
+
+    def test_buzz_not_in_tossup(self):
+        """Test buzzing not during tossup phase."""
+        game = GAMES["tossup_test"]
+        game.phase = "normal"
+
+        self.client.emit("buzz", {"room": "tossup_test"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("toss-up" in str(t["args"]).lower() for t in toast_events)
+
+    def test_buzz_when_locked(self):
+        """Test buzzing when player is locked out."""
+        game = GAMES["tossup_test"]
+        game.phase = "tossup"
+        game.tossup_locked_sids.add(game.players[0].claimed_sid)
+
+        self.client.emit("buzz", {"room": "tossup_test"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("locked out" in str(t["args"]).lower() for t in toast_events)
+
+    def test_buzz_when_someone_already_buzzed(self):
+        """Test buzzing when someone else already buzzed."""
+        game = GAMES["tossup_test"]
+        game.phase = "tossup"
+        game.tossup_controller_sid = "other_sid"
+
+        self.client.emit("buzz", {"room": "tossup_test"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("already buzzed" in str(t["args"]).lower() for t in toast_events)
+
+    def test_start_tossup_not_host(self):
+        """Test starting tossup without being host."""
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "NotHost")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "tossup_test"})
+        client2.get_received()
+
+        client2.emit("start_tossup", {"room": "tossup_test"})
+        received = client2.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("host" in str(t["args"]).lower() for t in toast_events)
+        client2.disconnect()
+
+
+class TestFinalPhase:
+    """Tests for final phase handlers."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "FinalPlayer")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
+        self.client.emit("join", {"room": "final_test"})
+        self.client.get_received()
+        self.client.emit("claim_host", {"room": "final_test", "code": "testcode"})
+        self.client.get_received()
+        self.client.emit("join_game", {"room": "final_test"})
+        self.client.get_received()
+
+    def teardown_method(self):
+        if self.client.is_connected():
+            self.client.disconnect()
+
+    def test_start_final(self):
+        """Test starting final round."""
+        self.client.emit("start_final", {"room": "final_test"})
+        received = self.client.get_received()
+
+        game = GAMES["final_test"]
+        assert game.phase == "final"
+        assert game.final_stage == "pick"
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("final round" in str(t["args"]).lower() for t in toast_events)
+
+    def test_end_final(self):
+        """Test ending final round."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+
+        self.client.emit("end_final", {"room": "final_test"})
+        self.client.get_received()
+
+        assert game.phase == "normal"
+        assert game.final_stage == "off"
+
+    def test_final_pick_consonant(self):
+        """Test picking a consonant in final round."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+        # Add RSTLNE to used letters as they would be in real final
+        for ch in "RSTLNE":
+            game.used_letters.add(ch)
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "consonant", "letter": "B"})
+        received = self.client.get_received()
+
+        assert "B" in game.final_picks_consonants
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("picked consonant" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_vowel(self):
+        """Test picking a vowel in final round."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+        for ch in "RSTLNE":
+            game.used_letters.add(ch)
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "vowel", "letter": "O"})
+        received = self.client.get_received()
+
+        assert game.final_pick_vowel == "O"
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("picked vowel" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_wrong_phase(self):
+        """Test picking when not in final pick phase."""
+        game = GAMES["final_test"]
+        game.phase = "normal"
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "consonant", "letter": "B"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("not in final pick" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_invalid_kind(self):
+        """Test picking with invalid kind."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "invalid", "letter": "B"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("invalid pick kind" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_vowel_as_consonant(self):
+        """Test trying to pick vowel as consonant."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "consonant", "letter": "A"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("vowel" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_consonant_as_vowel(self):
+        """Test trying to pick consonant as vowel."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "vowel", "letter": "B"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("not a vowel" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_already_picked_consonants(self):
+        """Test trying to pick more than 3 consonants."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+        game.final_picks_consonants = ["B", "C", "D"]
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "consonant", "letter": "F"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("already picked 3" in str(t["args"]).lower() for t in toast_events)
+
+    def test_final_pick_already_picked_vowel(self):
+        """Test trying to pick more than 1 vowel."""
+        game = GAMES["final_test"]
+        game.phase = "final"
+        game.final_stage = "pick"
+        game.set_puzzle(1, "Test", "HELLO")
+        game.final_pick_vowel = "A"
+
+        self.client.emit("final_pick", {"room": "final_test", "kind": "vowel", "letter": "O"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("already picked a vowel" in str(t["args"]).lower() for t in toast_events)
+
+
+class TestHostActions:
+    """Tests for additional host-only actions."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "HostPlayer")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
+        self.client.emit("join", {"room": "host_actions_test"})
+        self.client.get_received()
+        self.client.emit("claim_host", {"room": "host_actions_test", "code": "testcode"})
+        self.client.get_received()
+        self.client.emit("join_game", {"room": "host_actions_test"})
+        self.client.get_received()
+
+    def teardown_method(self):
+        if self.client.is_connected():
+            self.client.disconnect()
+
+    def test_set_active_pack(self):
+        """Test setting active pack as host."""
+        from app import db_get_pack_id
+        pack_id = db_get_pack_id("Test Set Pack")
+
+        self.client.emit("set_active_pack", {"room": "host_actions_test", "pack_id": pack_id})
+        received = self.client.get_received()
+
+        game = GAMES["host_actions_test"]
+        assert game.active_pack_id == pack_id
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("active pack set" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_active_pack_clear(self):
+        """Test clearing active pack."""
+        game = GAMES["host_actions_test"]
+        game.active_pack_id = 1
+
+        self.client.emit("set_active_pack", {"room": "host_actions_test", "pack_id": None})
+        self.client.get_received()
+
+        assert game.active_pack_id is None
+
+    def test_set_active_pack_not_host(self):
+        """Test setting active pack without being host."""
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "NotHost")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "host_actions_test"})
+        client2.get_received()
+
+        client2.emit("set_active_pack", {"room": "host_actions_test", "pack_id": 1})
+        received = client2.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("host" in str(t["args"]).lower() for t in toast_events)
+        client2.disconnect()
+
+    def test_set_players(self):
+        """Test setting player names."""
+        self.client.emit("set_players", {"room": "host_actions_test", "names": ["Alice", "Bob", "Carol"]})
+        received = self.client.get_received()
+
+        game = GAMES["host_actions_test"]
+        assert len(game.players) == 3
+        assert game.players[0].name == "Alice"
+        assert game.players[1].name == "Bob"
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("3 players" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_players_empty(self):
+        """Test setting players with empty list."""
+        self.client.emit("set_players", {"room": "host_actions_test", "names": []})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("provide" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_prize_names(self):
+        """Test setting prize wedge names."""
+        game = GAMES["host_actions_test"]
+        # Set up a prize wedge
+        game.wheel_slots = [{"type": "PRIZE", "name": "OLD"}, 500, 600]
+
+        self.client.emit("set_prize_names", {"room": "host_actions_test", "names": ["NEW PRIZE"]})
+        received = self.client.get_received()
+
+        assert game.wheel_slots[0]["name"] == "NEW PRIZE"
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("updated" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_config(self):
+        """Test setting game config."""
+        self.client.emit("set_config", {
+            "room": "host_actions_test",
+            "config": {
+                "vowel_cost": 300,
+                "final_seconds": 45,
+                "final_jackpot": 15000
+            }
+        })
+        received = self.client.get_received()
+
+        game = GAMES["host_actions_test"]
+        assert game.vowel_cost == 300
+        assert game.final_seconds == 45
+        assert game.final_jackpot == 15000
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("config saved" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_active_player(self):
+        """Test setting active player."""
+        game = GAMES["host_actions_test"]
+        # Add more players
+        game.players = [
+            game.players[0] if game.players else type("Player", (), {"id": 0, "name": "P1", "claimed_sid": None, "total": 0, "round_bank": 0, "prizes": [], "round_prizes": [], "claimed_user_id": None})(),
+        ]
+        from app import Player
+        game.players.append(Player(1, "Player2"))
+        game.players.append(Player(2, "Player3"))
+
+        self.client.emit("set_active_player", {"room": "host_actions_test", "player_idx": 2})
+        received = self.client.get_received()
+
+        assert game.active_idx == 2
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("player3" in str(t["args"]).lower() for t in toast_events)
+
+    def test_set_active_player_invalid_index(self):
+        """Test setting active player with invalid index."""
+        self.client.emit("set_active_player", {"room": "host_actions_test", "player_idx": 99})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("invalid" in str(t["args"]).lower() for t in toast_events)
+
+    def test_release_host_not_host(self):
+        """Test releasing host when not the host."""
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "NotHost")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "host_actions_test"})
+        client2.get_received()
+
+        client2.emit("release_host", {"room": "host_actions_test"})
+        received = client2.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("only the host" in str(t["args"]).lower() for t in toast_events)
+        client2.disconnect()
+
+
+class TestLoadPack:
+    """Tests for load_pack handler."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+        self.client = socketio.test_client(app, flask_test_client=app.test_client())
+        self.client.emit("join", {"room": "load_pack_test"})
+        self.client.get_received()
+        self.client.emit("claim_host", {"room": "load_pack_test", "code": "testcode"})
+        self.client.get_received()
+
+    def teardown_method(self):
+        if self.client.is_connected():
+            self.client.disconnect()
+
+    def test_load_pack_no_name(self):
+        """Test loading pack without name."""
+        self.client.emit("load_pack", {"room": "load_pack_test", "pack_name": "", "text": "Cat|Ans"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("name is required" in str(t["args"]).lower() for t in toast_events)
+
+    def test_load_pack_no_valid_lines(self):
+        """Test loading pack with no valid lines."""
+        self.client.emit("load_pack", {"room": "load_pack_test", "pack_name": "Test", "text": "no pipe here"})
+        received = self.client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("no valid lines" in str(t["args"]).lower() for t in toast_events)
+
+
+class TestLeaveGameEdgeCases:
+    """Tests for leave_game edge cases."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_leave_game_not_in_game(self):
+        """Test leaving when not in game."""
+        flask_client = app.test_client()
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "leave_edge_test"})
+        client.get_received()
+
+        client.emit("leave_game", {"room": "leave_edge_test"})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("not in this game" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+    def test_leave_game_adjusts_active_idx(self):
+        """Test that leaving adjusts active_idx correctly."""
+        # Create 3 players
+        flask_clients = []
+        clients = []
+        for i in range(3):
+            fc = app.test_client()
+            create_test_user_session(fc, f"Player{i}")
+            c = socketio.test_client(app, flask_test_client=fc)
+            c.emit("join", {"room": "leave_idx_test"})
+            c.get_received()
+            c.emit("join_game", {"room": "leave_idx_test"})
+            c.get_received()
+            flask_clients.append(fc)
+            clients.append(c)
+
+        game = GAMES["leave_idx_test"]
+        game.active_idx = 1  # Second player active
+
+        # First player leaves (player before active leaves)
+        clients[0].emit("leave_game", {"room": "leave_idx_test"})
+        clients[0].get_received()
+
+        # active_idx should decrease by 1 since a player before active was removed
+        assert game.active_idx == 0
+        assert len(game.players) == 2
+
+        for c in clients:
+            if c.is_connected():
+                c.disconnect()
+
+    def test_leave_game_active_player_leaves(self):
+        """Test active player leaving adjusts correctly."""
+        flask_clients = []
+        clients = []
+        for i in range(3):
+            fc = app.test_client()
+            create_test_user_session(fc, f"ActiveLeave{i}")
+            c = socketio.test_client(app, flask_test_client=fc)
+            c.emit("join", {"room": "active_leave_test"})
+            c.get_received()
+            c.emit("join_game", {"room": "active_leave_test"})
+            c.get_received()
+            flask_clients.append(fc)
+            clients.append(c)
+
+        game = GAMES["active_leave_test"]
+        game.active_idx = 2  # Third player active (last one)
+
+        # Last player leaves
+        clients[2].emit("leave_game", {"room": "active_leave_test"})
+        clients[2].get_received()
+
+        # active_idx should reset to 0 since removed player was at end
+        assert game.active_idx == 0
+        assert len(game.players) == 2
+
+        for c in clients:
+            if c.is_connected():
+                c.disconnect()
+
+
+class TestJoinGameReconnect:
+    """Tests for join_game reconnection scenarios."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_join_game_already_in_game(self):
+        """Test joining when already in the game (reconnection)."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ReconnectPlayer")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "reconnect_test"})
+        client.get_received()
+        client.emit("join_game", {"room": "reconnect_test"})
+        client.get_received()
+
+        game = GAMES["reconnect_test"]
+        original_player_count = len(game.players)
+        original_sid = game.players[0].claimed_sid
+
+        # Disconnect and reconnect
+        client.disconnect()
+        client2 = socketio.test_client(app, flask_test_client=flask_client)
+        client2.emit("join", {"room": "reconnect_test"})
+        client2.get_received()
+        client2.emit("join_game", {"room": "reconnect_test"})
+        received = client2.get_received()
+
+        # Should have same number of players (reconnected, not added new)
+        assert len(game.players) == original_player_count
+        # SID should be updated
+        assert game.players[0].claimed_sid != original_sid
+
+        you_events = [r for r in received if r["name"] == "you"]
+        assert len(you_events) >= 1
+        assert you_events[0]["args"][0]["player_idx"] == 0
+
+        client2.disconnect()
+
+
+class TestBuzzNotPlayer:
+    """Test buzzing when not a player."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_buzz_not_claimed_player(self):
+        """Test buzzing without claiming a player slot."""
+        flask_client = app.test_client()
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "buzz_not_player_test"})
+        client.get_received()
+
+        game = GAMES["buzz_not_player_test"]
+        game.phase = "tossup"
+        game.tossup_controller_sid = None
+
+        client.emit("buzz", {"room": "buzz_not_player_test"})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("claim a player" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+
+class TestTossupAllowedPlayers:
+    """Test tossup with allowed player restrictions."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_buzz_not_in_allowed_players(self):
+        """Test buzzing when not in allowed players list."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "NotAllowed")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "allowed_test"})
+        client.get_received()
+        client.emit("join_game", {"room": "allowed_test"})
+        client.get_received()
+
+        game = GAMES["allowed_test"]
+        game.phase = "tossup"
+        game.tossup_controller_sid = None
+        game.tossup_allowed_player_idxs = [5, 6, 7]  # Not including player 0
+
+        client.emit("buzz", {"room": "allowed_test"})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("not allowed to buzz" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+
+class TestClaimPlayer:
+    """Test claim_player handler."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_claim_player_no_id(self):
+        """Test claiming without player_id fails."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ClaimTest")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "claim_test"})
+        client.get_received()
+
+        client.emit("claim_player", {"room": "claim_test"})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("choose a player slot" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+    def test_claim_player_invalid_id(self):
+        """Test claiming with invalid player_id fails."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ClaimTest2")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "claim_invalid_test"})
+        client.get_received()
+
+        client.emit("claim_player", {"room": "claim_invalid_test", "player_id": 99})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("bad player slot" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+    def test_claim_player_already_claimed_by_other(self):
+        """Test claiming slot claimed by another user fails."""
+        from app import Player
+
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ClaimTest3")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "claim_other_test"})
+        client.get_received()
+
+        game = GAMES["claim_other_test"]
+        # Add a player claimed by another user
+        player = Player(0, "OtherUser")
+        player.claimed_user_id = 99999  # Different user
+        player.claimed_sid = "other_sid"
+        game.players = [player]
+
+        client.emit("claim_player", {"room": "claim_other_test", "player_id": 0})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("claimed by another user" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+    def test_claim_player_success(self):
+        """Test successful player claim."""
+        from app import Player
+
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ClaimSuccess")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "claim_success_test"})
+        client.get_received()
+
+        game = GAMES["claim_success_test"]
+        game.players = [Player(0, "Unclaimed"), Player(1, "AlsoUnclaimed")]
+
+        client.emit("claim_player", {"room": "claim_success_test", "player_id": 1, "name": "NewName"})
+        received = client.get_received()
+
+        assert game.players[1].claimed_sid is not None
+        assert game.players[1].name == "NewName"
+        you_events = [r for r in received if r["name"] == "you"]
+        assert len(you_events) >= 1
+        client.disconnect()
+
+
+class TestReleasePlayer:
+    """Test release_player handler."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_release_player_success(self):
+        """Test successful player release."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "ReleaseTest")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "release_test"})
+        client.get_received()
+        client.emit("join_game", {"room": "release_test"})
+        client.get_received()
+
+        game = GAMES["release_test"]
+        assert len(game.players) == 1
+        assert game.players[0].claimed_sid is not None
+
+        client.emit("release_player", {"room": "release_test"})
+        received = client.get_received()
+
+        assert game.players[0].claimed_sid is None
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("released" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+
+class TestNewPuzzleEdgeCases:
+    """Test new_puzzle edge cases."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_new_puzzle_no_puzzles_left(self):
+        """Test new_puzzle when no unused puzzles available."""
+        flask_client = app.test_client()
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "no_puzzles_test"})
+        client.get_received()
+        client.emit("claim_host", {"room": "no_puzzles_test", "code": "testcode"})
+        client.get_received()
+
+        game = GAMES["no_puzzles_test"]
+        # Mark all puzzles as used (create a huge set of used puzzle IDs)
+        game.active_pack_id = 999999  # Non-existent pack
+
+        client.emit("new_puzzle", {"room": "no_puzzles_test"})
+        received = client.get_received()
+
+        # Should get message about no puzzles
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert len(toast_events) >= 1
+        client.disconnect()
+
+
+class TestGuessEdgeCases:
+    """Test additional guess edge cases."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_guess_not_a_letter(self):
+        """Test guessing a non-letter character."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "GuessEdge")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "guess_edge_test"})
+        client.get_received()
+        client.emit("join_game", {"room": "guess_edge_test"})
+        client.get_received()
+
+        game = GAMES["guess_edge_test"]
+        game.set_puzzle(1, "Test", "HELLO")
+        game.current_wedge = 500
+
+        client.emit("guess", {"room": "guess_edge_test", "letter": "5"})
+        received = client.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("enter a letter" in str(t["args"]).lower() for t in toast_events)
+        client.disconnect()
+
+
+class TestSolveInTossup:
+    """Test solve during tossup phase."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_solve_during_tossup_not_controller(self):
+        """Test solving during tossup when not the controller."""
+        flask_client = app.test_client()
+        create_test_user_session(flask_client, "TossupNotCtrl")
+        client = socketio.test_client(app, flask_test_client=flask_client)
+        client.emit("join", {"room": "tossup_notctrl_test"})
+        client.get_received()
+        client.emit("join_game", {"room": "tossup_notctrl_test"})
+        client.get_received()
+
+        game = GAMES["tossup_notctrl_test"]
+        game.phase = "tossup"
+        game.set_puzzle(1, "Test", "HELLO")
+        game.tossup_controller_sid = "some_other_sid"  # Not this player
+
+        client.emit("solve", {"room": "tossup_notctrl_test", "attempt": "HELLO"})
+        received = client.get_received()
+
+        # Should get error message
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert len(toast_events) >= 1
+        client.disconnect()
