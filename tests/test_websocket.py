@@ -1650,7 +1650,6 @@ class TestSpinAsHost:
 
         game = GAMES["spin_host_test"]
         game.set_puzzle(1, "Test", "HELLO")
-        initial_last_spin = game.last_spin_index
 
         # Host spins (not the active player)
         client2.emit("spin", {"room": "spin_host_test"})
