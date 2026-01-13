@@ -441,11 +441,10 @@ class TestDatabaseAdvanced:
 
     def test_db_set_room_config_string_values(self):
         # Test with string values for prize_replace_cash_values
-        db_set_room_config("string_values_room", {
-            "vowel_cost": 300,
-            "final_jackpot": 15000,
-            "prize_replace_cash_values": "100, 200, 300"
-        })
+        db_set_room_config(
+            "string_values_room",
+            {"vowel_cost": 300, "final_jackpot": 15000, "prize_replace_cash_values": "100, 200, 300"},
+        )
         cfg = db_get_room_config("string_values_room")
         assert cfg["vowel_cost"] == 300
         assert cfg["prize_replace_cash_values"] == [100, 200, 300]
@@ -453,11 +452,7 @@ class TestDatabaseAdvanced:
 
 class TestGameStateConfig:
     def test_load_config_from_db(self):
-        db_set_room_config("config_load_room", {
-            "vowel_cost": 400,
-            "final_seconds": 45,
-            "final_jackpot": 20000
-        })
+        db_set_room_config("config_load_room", {"vowel_cost": 400, "final_seconds": 45, "final_jackpot": 20000})
 
         g = GameState(room="config_load_room")
         g.load_config_from_db()
@@ -637,7 +632,7 @@ class TestApiImportPacks:
             response = client.post(
                 "/api/import_packs?room=import_test&sid=wrong_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 403
 
@@ -648,11 +643,11 @@ class TestApiImportPacks:
         g.host_sid = "host_sid"
 
         with app.test_client() as client:
-            data = io.BytesIO(b'not valid json')
+            data = io.BytesIO(b"not valid json")
             response = client.post(
                 "/api/import_packs?room=import_json_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 400
             assert "Invalid JSON" in response.get_json()["error"]
@@ -668,7 +663,7 @@ class TestApiImportPacks:
             response = client.post(
                 "/api/import_packs?room=import_empty_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 400
             assert "packs" in response.get_json()["error"]
@@ -686,8 +681,8 @@ class TestApiImportPacks:
                     "name": "Import Test Pack",
                     "puzzles": [
                         {"category": "Test", "answer": "ANSWER ONE"},
-                        {"category": "Test", "answer": "ANSWER TWO"}
-                    ]
+                        {"category": "Test", "answer": "ANSWER TWO"},
+                    ],
                 }
             ]
         }
@@ -697,7 +692,7 @@ class TestApiImportPacks:
             response = client.post(
                 "/api/import_packs?room=import_success_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -721,7 +716,7 @@ class TestApiImportPacksEdgeCases:
             response = client.post(
                 "/api/import_packs?room=import_malformed_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             # Should succeed but skip malformed packs
             assert response.status_code == 200
@@ -742,7 +737,7 @@ class TestApiImportPacksEdgeCases:
             response = client.post(
                 "/api/import_packs?room=import_empty_puzzles_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -755,21 +750,14 @@ class TestApiImportPacksEdgeCases:
         g = get_game("import_whitespace_test")
         g.host_sid = "host_sid"
 
-        payload = {
-            "packs": [
-                {
-                    "name": "   ",
-                    "puzzles": [{"category": "Cat", "answer": "Ans"}]
-                }
-            ]
-        }
+        payload = {"packs": [{"name": "   ", "puzzles": [{"category": "Cat", "answer": "Ans"}]}]}
 
         with app.test_client() as client:
             data = io.BytesIO(json.dumps(payload).encode())
             response = client.post(
                 "/api/import_packs?room=import_whitespace_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -796,7 +784,7 @@ class TestApiImportPacksEdgeCases:
             response = client.post(
                 "/api/import_packs?room=import_mixed_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -818,7 +806,7 @@ class TestApiImportPacksEdgeCases:
                         {"category": "Cat"},  # Missing answer
                         {"answer": "Ans"},  # Missing category
                         {"category": "Valid", "answer": "Complete"},  # Valid
-                    ]
+                    ],
                 }
             ]
         }
@@ -828,7 +816,7 @@ class TestApiImportPacksEdgeCases:
             response = client.post(
                 "/api/import_packs?room=import_missing_fields_test&sid=host_sid",
                 data={"file": (data, "test.json")},
-                content_type="multipart/form-data"
+                content_type="multipart/form-data",
             )
             assert response.status_code == 200
             result = response.get_json()
@@ -882,10 +870,7 @@ class TestGameStateGuessLogic:
         g.current_wedge = {"type": "PRIZE", "name": "GIFT CARD"}
 
         # Check if prize already exists (mimics the logic in guess handler)
-        already = any(
-            isinstance(x, dict) and x.get("name") == "GIFT CARD"
-            for x in g.players[0].round_prizes
-        )
+        already = any(isinstance(x, dict) and x.get("name") == "GIFT CARD" for x in g.players[0].round_prizes)
         assert already is True
 
     def test_guess_free_play_keeps_turn(self):
@@ -1311,6 +1296,7 @@ class TestWheelSlotReplacement:
 
         # Simulate prize won - replace with cash value
         import random
+
         replacement = int(random.choice(g.prize_replace_cash_values))
         g.wheel_slots[g.last_spin_index] = replacement
 

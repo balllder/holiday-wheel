@@ -94,6 +94,14 @@ pre-commit install
 - Room lobby with active room browsing
 - Admin panel for user/pack/config management
 
+**TV Display (static/tv.js + templates/tv.html)**:
+- Full-screen display optimized for AppleTV and large screens
+- Route: `/tv/<room>` - requires login
+- Classic TV game show layout: wheel left, puzzle center, players bottom
+- Keyboard navigation for AppleTV remote (arrow keys, Enter, Escape/Menu)
+- Hidden host controls bar (toggle with Escape/Menu key)
+- TV-safe margins and responsive scaling for 1080p to 4K displays
+
 **Database Schema**:
 - `packs`: Puzzle pack collections
 - `puzzles`: Individual puzzles with category, answer, enabled flag, pack_id
@@ -171,11 +179,26 @@ pre-commit install
 - Pack management (list, create, import JSON, delete)
 - Room config (load, save per room)
 
+**static/tv.js** (~300 lines):
+- WebSocket connection and state handling
+- Puzzle board and wheel rendering (adapted from app.js)
+- Keyboard navigation state machine for AppleTV remote
+- Host control button handlers
+
+**templates/tv.html**:
+- Full-viewport TV display layout
+- TV-safe area margins
+- Hidden controls bar with host actions
+
 ## CI/CD
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main and beta branches:
 - **build**: Installs dependencies, checks syntax, lints with ruff, type checks with mypy, runs tests with coverage
-- **docker**: Builds Docker image
+- **docker**: Builds and pushes Docker image based on branch:
+  - `main` branch → `clockboy/holiday-wheel:latest` + `:$SHA`
+  - `beta` branch → `clockboy/holiday-wheel:beta` + `:beta-$SHA`
+
+**Beta Channel**: Push to `beta` branch to test new features with Docker tag `beta`. Merge to `main` when ready for production.
 
 Coverage reports are uploaded to [Codecov](https://codecov.io/gh/balllder/holiday-wheel).
 

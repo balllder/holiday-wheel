@@ -45,6 +45,7 @@ EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 def login_required(f):
     """Decorator to require authentication."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         user = get_current_user()
@@ -53,6 +54,7 @@ def login_required(f):
                 return jsonify({"ok": False, "error": "Authentication required"}), 401
             return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -104,21 +106,12 @@ def login():
 
     db_update_last_login(user["id"])
 
-    response = jsonify({
-        "ok": True,
-        "user": {"id": user["id"], "display_name": user["display_name"]}
-    })
+    response = jsonify({"ok": True, "user": {"id": user["id"], "display_name": user["display_name"]}})
 
     if remember_me:
         remember_token = secrets.token_urlsafe(32)
         db_set_remember_token(user["id"], remember_token)
-        response.set_cookie(
-            "remember_token",
-            remember_token,
-            max_age=30 * 24 * 60 * 60,
-            httponly=True,
-            samesite="Lax"
-        )
+        response.set_cookie("remember_token", remember_token, max_age=30 * 24 * 60 * 60, httponly=True, samesite="Lax")
 
     return response
 
@@ -142,7 +135,7 @@ def verify_recaptcha(token: str, expected_action: str = "register") -> tuple[boo
         response = requests.post(
             "https://www.google.com/recaptcha/api/siteverify",
             data={"secret": RECAPTCHA_SECRET_KEY, "response": token},
-            timeout=10
+            timeout=10,
         )
         result = response.json()
 
@@ -218,15 +211,9 @@ def register():
         send_verification_email(email, verification_token)
     except Exception as e:
         # User was created but email failed - still return success with warning
-        return jsonify({
-            "ok": True,
-            "message": f"Account created but email failed to send: {str(e)}. Contact support."
-        })
+        return jsonify({"ok": True, "message": f"Account created but email failed to send: {str(e)}. Contact support."})
 
-    return jsonify({
-        "ok": True,
-        "message": "Registration successful! Please check your email to verify your account."
-    })
+    return jsonify({"ok": True, "message": "Registration successful! Please check your email to verify your account."})
 
 
 @auth_bp.route("/verify/<token>")
@@ -235,17 +222,20 @@ def verify_email(token):
     user = db_get_user_by_verification_token(token)
 
     if not user:
-        return render_template("auth/verify_result.html", success=False,
-                               message="Invalid or expired verification link.")
+        return render_template(
+            "auth/verify_result.html", success=False, message="Invalid or expired verification link."
+        )
 
     if user["verification_token_expires"] < int(time.time()):
-        return render_template("auth/verify_result.html", success=False,
-                               message="Verification link has expired. Please register again.")
+        return render_template(
+            "auth/verify_result.html", success=False, message="Verification link has expired. Please register again."
+        )
 
     db_verify_user(user["id"])
 
-    return render_template("auth/verify_result.html", success=True,
-                           message="Email verified successfully! You can now log in.")
+    return render_template(
+        "auth/verify_result.html", success=True, message="Email verified successfully! You can now log in."
+    )
 
 
 @auth_bp.route("/logout", methods=["POST"])
@@ -278,6 +268,7 @@ def list_rooms():
     # Import GAMES to get player counts
     try:
         from app import GAMES
+
         for room in rooms:
             game = GAMES.get(room["name"])
             if game:
@@ -300,25 +291,23 @@ def me():
     user = get_current_user()
     if not user:
         return jsonify({"ok": False, "user": None})
-    return jsonify({
-        "ok": True,
-        "user": {
-            "id": user["id"],
-            "email": user["email"],
-            "display_name": user["display_name"]
-        }
-    })
+    return jsonify(
+        {"ok": True, "user": {"id": user["id"], "email": user["email"], "display_name": user["display_name"]}}
+    )
 
 
 # ---- Admin Routes ----
 
+
 def require_host(f):
     """Decorator to require host authentication via session."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("is_host"):
             return jsonify({"ok": False, "error": "Host authentication required"}), 403
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -420,6 +409,7 @@ def admin_list_rooms():
     # Get player counts from GAMES
     try:
         from app import GAMES
+
         for room in rooms:
             game = GAMES.get(room["name"])
             if game:
@@ -512,12 +502,7 @@ def admin_add_player(room_name):
 
     # Add player (not connected yet)
     new_id = len(game.players)
-    game.players.append(Player(
-        id=new_id,
-        name=user["display_name"],
-        claimed_sid=None,
-        claimed_user_id=user_id
-    ))
+    game.players.append(Player(id=new_id, name=user["display_name"], claimed_sid=None, claimed_user_id=user_id))
     broadcast(room_name)
 
     return jsonify({"ok": True, "player_idx": new_id})
@@ -580,12 +565,14 @@ def admin_get_available_users(room_name):
 
 # ---- Pack Management Routes ----
 
+
 @auth_bp.route("/admin/packs")
 @login_required
 @require_host
 def admin_list_packs():
     """List all puzzle packs."""
     from app import db_list_packs
+
     packs = db_list_packs()
     return jsonify({"ok": True, "packs": packs})
 
@@ -626,7 +613,9 @@ def admin_create_pack():
     try:
         pack_id = db_get_pack_id(pack_name)
         added = db_add_puzzles(lines, pack_id)
-        return jsonify({"ok": True, "pack_id": pack_id, "added": added, "message": f"Added {added} puzzles to '{pack_name}'"})
+        return jsonify(
+            {"ok": True, "pack_id": pack_id, "added": added, "message": f"Added {added} puzzles to '{pack_name}'"}
+        )
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -701,12 +690,14 @@ def admin_delete_pack(pack_id):
 
 # ---- Room Config Routes ----
 
+
 @auth_bp.route("/admin/config/<room>")
 @login_required
 @require_host
 def admin_get_config(room):
     """Get room configuration."""
     from app import db_get_room_config
+
     config = db_get_room_config(room)
     return jsonify({"ok": True, "config": config})
 

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>TV Display - {{ room }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=13" />
+</head>
+<body class="tv-body">
+  <div class="tv-container">
+    <!-- Main game area: wheel left, puzzle center -->
+    <div class="tv-main">
+      <!-- Wheel section -->
+      <div class="tv-wheel-section">
+        <div class="tv-wheel-wrap">
+          <canvas id="wheel" width="300" height="300"></canvas>
+          <div class="tv-pointer"></div>
+        </div>
+        <div class="tv-wedge-display">
+          <span id="wedgeValue">--</span>
+        </div>
+      </div>
+
+      <!-- Puzzle section -->
+      <div class="tv-puzzle-section">
+        <div class="tv-category" id="category">--</div>
+        <div class="tv-board-wrap">
+          <div id="vannaBoard" class="tv-vanna-board"></div>
+        </div>
+        <div class="tv-phase-badge">
+          <span id="phasePill">NORMAL</span>
+          <span id="finalCountdown" class="tv-final-countdown hidden">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player scores bar -->
+    <div class="tv-players-bar" id="playersBar">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <!-- Host controls bar (hidden until focused) -->
+    <div class="tv-controls-bar" id="controlsBar">
+      <div class="tv-controls-inner">
+        <button id="spinBtn" class="tv-btn" data-nav="0">SPIN</button>
+        <button id="newPuzzleBtn" class="tv-btn" data-nav="1">NEW PUZZLE</button>
+        <button id="startTossupBtn" class="tv-btn" data-nav="2">TOSS-UP</button>
+        <button id="endTossupBtn" class="tv-btn" data-nav="3">END TOSS-UP</button>
+        <button id="startFinalBtn" class="tv-btn" data-nav="4">FINAL</button>
+        <button id="endFinalBtn" class="tv-btn" data-nav="5">END FINAL</button>
+        <button id="newGameBtn" class="tv-btn" data-nav="6">NEW GAME</button>
+        <button id="revealAllBtn" class="tv-btn" data-nav="7">REVEAL</button>
+      </div>
+      <div class="tv-controls-hint">
+        Press <kbd>Menu</kbd> to toggle controls
+      </div>
+    </div>
+
+    <!-- Connection status -->
+    <div class="tv-conn-status" id="connStatus">
+      <span id="connDot" class="tv-conn-dot off"></span>
+      <span id="connText">Connecting...</span>
+    </div>
+  </div>
+
+  <script>window.__ROOM__ = "{{ room }}";</script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="{{ url_for('static', filename='tv.js') }}?v=1"></script>
+</body>
+</html>
