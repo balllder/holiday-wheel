@@ -1090,9 +1090,14 @@ def leave_game(data):
     broadcast(room)
 
 
-def require_active_player(g: GameState) -> bool:
+def require_active_player(g: GameState, allow_host: bool = False) -> bool:
+    """Check if current socket is the active player, or optionally the host."""
+    sid = _get_sid()
+    # Allow host to act on behalf of active player (for TV display)
+    if allow_host and sid == g.host_sid:
+        return True
     p = g.active_player()
-    return p is not None and p.claimed_sid == _get_sid()
+    return p is not None and p.claimed_sid == sid
 
 
 @socketio.on("load_pack")
@@ -1144,6 +1149,22 @@ def new_puzzle(data):
     broadcast(room)
 
 
+@socketio.on("reveal_all")
+def reveal_all(data):
+    """Reveal all letters in the current puzzle (host only)."""
+    room = (data or {}).get("room", "main")
+    g = get_game(room)
+    if _get_sid() != g.host_sid:
+        emit("toast", {"msg": "Host only."})
+        return
+    answer = g.puzzle.get("answer", "")
+    for ch in answer.upper():
+        if ch.isalpha():
+            g.revealed.add(ch)
+    emit("toast", {"msg": "All letters revealed."})
+    broadcast(room)
+
+
 @socketio.on("new_game")
 def new_game(data):
     room = (data or {}).get("room", "main")
@@ -1180,8 +1201,8 @@ def spin(data):
     if g.phase != "normal":
         emit("toast", {"msg": "Spin is only allowed during normal rounds."})
         return
-    if not require_active_player(g):
-        emit("toast", {"msg": "Only the active player can spin."})
+    if not require_active_player(g, allow_host=True):
+        emit("toast", {"msg": "Only the active player (or host) can spin."})
         return
 
     g.spin()

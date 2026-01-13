@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>TV Display - {{ room }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=13" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=14" />
 </head>
 <body class="tv-body">
   <div class="tv-container">
@@ -67,6 +67,6 @@
 
   <script>window.__ROOM__ = "{{ room }}";</script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="{{ url_for('static', filename='tv.js') }}?v=1"></script>
+  <script src="{{ url_for('static', filename='tv.js') }}?v=2"></script>
 </body>
 </html>

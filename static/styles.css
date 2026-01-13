@@ -1037,9 +1037,10 @@ button.danger:hover{
   height:100vh;
   display:flex;
   flex-direction:column;
-  /* TV safe area margins */
-  padding:3vh 3vw;
+  /* TV safe area margins + extra bottom for controls */
+  padding:3vh 3vw 12vh 3vw;
   box-sizing:border-box;
+  overflow:hidden;
 }
 
 /* Main game area: wheel left, puzzle center-right */
@@ -1098,7 +1099,8 @@ button.danger:hover{
   flex-direction:column;
   align-items:center;
   gap:2vh;
-  max-width:70vw;
+  max-width:65vw;
+  min-width:0; /* Allow shrinking */
 }
 
 .tv-category{
@@ -1112,6 +1114,8 @@ button.danger:hover{
 
 .tv-board-wrap{
   width:100%;
+  max-width:100%;
+  overflow:hidden;
 }
 
 .tv-vanna-board{
@@ -1132,15 +1136,15 @@ button.danger:hover{
 }
 
 .tv-vCell{
-  width:clamp(40px, 4.5vw, 64px);
-  height:clamp(48px, 5.5vw, 72px);
+  width:clamp(32px, 4vw, 56px);
+  height:clamp(38px, 4.8vw, 64px);
   flex-shrink:0;
-  border-radius:6px;
+  border-radius:5px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:900;
-  font-size:clamp(20px, 2.8vw, 42px);
+  font-size:clamp(16px, 2.4vw, 36px);
   letter-spacing:1px;
 }
 
