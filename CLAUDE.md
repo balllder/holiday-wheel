@@ -192,9 +192,13 @@ pre-commit install
 
 ## CI/CD
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main:
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push/PR to main and beta branches:
 - **build**: Installs dependencies, checks syntax, lints with ruff, type checks with mypy, runs tests with coverage
-- **docker**: Builds Docker image
+- **docker**: Builds and pushes Docker image based on branch:
+  - `main` branch → `clockboy/holiday-wheel:latest` + `:$SHA`
+  - `beta` branch → `clockboy/holiday-wheel:beta` + `:beta-$SHA`
+
+**Beta Channel**: Push to `beta` branch to test new features with Docker tag `beta`. Merge to `main` when ready for production.
 
 Coverage reports are uploaded to [Codecov](https://codecov.io/gh/balllder/holiday-wheel).
 

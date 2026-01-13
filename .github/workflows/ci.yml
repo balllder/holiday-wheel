@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, beta]
   pull_request:
-    branches: [main]
+    branches: [main, beta]
 
 jobs:
   build:
@@ -58,7 +58,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (main)
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -66,3 +67,13 @@ jobs:
           tags: |
             clockboy/holiday-wheel:latest
             clockboy/holiday-wheel:${{ github.sha }}
+
+      - name: Build and push Docker image (beta)
+        if: github.ref == 'refs/heads/beta'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            clockboy/holiday-wheel:beta
+            clockboy/holiday-wheel:beta-${{ github.sha }}
