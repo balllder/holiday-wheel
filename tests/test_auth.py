@@ -1111,7 +1111,7 @@ class TestAdminRoomManagement:
 
     def test_admin_get_room_players(self):
         """Test getting players in a room."""
-        from app import GAMES, Player, get_game
+        from app import Player, get_game
 
         with app.test_client() as client:
             self._get_host_session(client)
@@ -1194,7 +1194,7 @@ class TestAdminRoomManagement:
 
     def test_admin_add_player_already_in_game(self):
         """Test adding user already in game fails."""
-        from app import GAMES, Player, get_game
+        from app import Player, get_game
 
         with app.test_client() as client:
             self._get_host_session(client)
@@ -1222,7 +1222,7 @@ class TestAdminRoomManagement:
 
     def test_admin_remove_player_from_room(self):
         """Test removing a player from a room."""
-        from app import GAMES, Player, get_game
+        from app import Player, get_game
 
         with app.test_client() as client:
             self._get_host_session(client)
@@ -1279,7 +1279,7 @@ class TestDbAuthFunctions:
 
     def test_db_set_remember_token(self):
         """Test setting remember token."""
-        from db_auth import db_set_remember_token, db_get_user_by_remember_token
+        from db_auth import db_get_user_by_remember_token, db_set_remember_token
 
         db_init_auth()
         email = "set_remember@example.com"
@@ -1651,7 +1651,6 @@ class TestLogoutClearsRememberToken:
 
     def test_logout_clears_remember_cookie(self):
         """Test logout clears the remember_token cookie."""
-        from db_auth import db_set_remember_token
 
         db_init_auth()
         email = "logout_clear@example.com"
