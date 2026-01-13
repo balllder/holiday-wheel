@@ -408,7 +408,6 @@ function renderBoard(){
     const rowWidth = ROW_WIDTHS[r];
     const rowDiv = document.createElement("div");
     rowDiv.className = "vRow";
-    rowDiv.style.gridTemplateColumns = `repeat(${rowWidth}, 1fr)`;
 
     for(let c=0;c<rowWidth;c++){
       const v = grid[r][c];

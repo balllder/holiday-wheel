@@ -1,56 +1,104 @@
+/* ========== WHEEL OF FORTUNE INSPIRED THEMES ========== */
+
+/* Dark Theme: Classic WoF - Deep purple/blue with gold accents */
 :root{
-  --bg:#0b1020;
-  --card:#121a33;
-  --text:#e8eeff;
-  --muted:rgba(232,238,255,.72);
-  --line:rgba(255,255,255,.10);
-  --btn:#2b5cff;
-  --btn2:#2b355a;
-  --input-bg:rgba(255,255,255,.06);
-  --card-bg:rgba(18,26,51,.9);
-  --player-bg:rgba(255,255,255,.04);
-  --hidden-tile-bg:rgba(43,92,255,.22);
-  --hidden-tile-border:rgba(43,92,255,.35);
+  --bg:#0d0628;
+  --card:#1a0a3e;
+  --text:#ffffff;
+  --muted:rgba(255,255,255,.7);
+  --line:rgba(212,175,55,.25);
+  --btn:#d4af37;
+  --btn-text:#1a0a3e;
+  --btn2:#2a1a4a;
+  --input-bg:rgba(255,255,255,.08);
+  --card-bg:rgba(26,10,62,.92);
+  --player-bg:rgba(212,175,55,.08);
+  --gold:#d4af37;
+  --gold-light:#ffd700;
+  --accent:#d4af37;
+  --hidden-tile-bg:rgba(212,175,55,.15);
+  --hidden-tile-border:rgba(212,175,55,.35);
 }
 
-/* Light theme */
+/* Light Theme: Retro WoF - Royal blue with gold trim */
 [data-theme="light"]{
-  --bg:#f0f2f5;
+  --bg:#e8f4ff;
   --card:#ffffff;
-  --text:#1a1a2e;
-  --muted:rgba(26,26,46,.65);
-  --line:rgba(0,0,0,.12);
-  --btn:#2b5cff;
-  --btn2:#d0d5e0;
-  --input-bg:rgba(0,0,0,.05);
-  --card-bg:rgba(255,255,255,.95);
-  --player-bg:rgba(0,0,0,.03);
-  --hidden-tile-bg:rgba(43,92,255,.12);
-  --hidden-tile-border:rgba(43,92,255,.25);
+  --text:#1a1a4e;
+  --muted:rgba(26,26,78,.6);
+  --line:rgba(184,134,11,.3);
+  --btn:#b8860b;
+  --btn-text:#ffffff;
+  --btn2:#d4e4f7;
+  --input-bg:rgba(26,26,78,.06);
+  --card-bg:rgba(255,255,255,.97);
+  --player-bg:rgba(184,134,11,.08);
+  --gold:#b8860b;
+  --gold-light:#daa520;
+  --accent:#b8860b;
+  --hidden-tile-bg:rgba(184,134,11,.12);
+  --hidden-tile-border:rgba(184,134,11,.3);
 }
 [data-theme="light"] body{
-  background:radial-gradient(900px 420px at 30% 0%, #c5d4f7 0%, transparent 60%), var(--bg);
+  background:linear-gradient(135deg, #c5d8f7 0%, #e8f4ff 50%, #f0f8ff 100%);
 }
 [data-theme="light"] .card{
-  box-shadow:0 4px 20px rgba(0,0,0,.08);
+  box-shadow:0 4px 24px rgba(26,26,78,.12);
+  border-color:rgba(184,134,11,.2);
+}
+[data-theme="light"] button{
+  color:var(--btn-text);
 }
 [data-theme="light"] button.secondary{
-  color:#1a1a2e;
+  color:#1a1a4e;
 }
 [data-theme="light"] .pointer{
-  border-top-color:rgba(0,0,0,.85);
+  border-top-color:#b8860b;
+}
+[data-theme="light"] .hostBanner{
+  background:rgba(184,134,11,.15);
+  border-color:rgba(184,134,11,.4);
+  color:#8b6914;
+}
+[data-theme="light"] h1{
+  color:#1a1a4e;
+}
+[data-theme="light"] .statusHighlight{
+  color:#b8860b;
+}
+[data-theme="light"] .player.active{
+  border-color:#b8860b;
+  box-shadow:0 0 12px rgba(184,134,11,.25);
+}
+[data-theme="light"] .vannaBoard{
+  border-color:#b8860b;
+}
+[data-theme="light"] .finalCountdownWrap{
+  border-color:#b8860b;
+  background:rgba(184,134,11,.1);
+}
+[data-theme="light"] .finalCountdownLabel{
+  color:#8b6914;
+}
+[data-theme="light"] .modalCard{
+  border-color:#b8860b;
 }
 
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:radial-gradient(900px 420px at 30% 0%, #1b2a6b 0%, transparent 60%), var(--bg);
+  background:linear-gradient(135deg, #1a0a3e 0%, #0d0628 50%, #0a0520 100%);
   color:var(--text);
 }
 
+/* Gold button text for dark theme */
+button{
+  color:var(--btn-text, white);
+}
+
 .top{padding:18px 16px; border-bottom:1px solid var(--line)}
-h1{margin:0 0 8px 0; font-size:22px}
+h1{margin:0 0 8px 0; font-size:22px; color:var(--gold-light)}
 .muted{color:var(--muted)}
 .small{font-size:12px}
 
@@ -82,10 +130,11 @@ h1{margin:0 0 8px 0; font-size:22px}
   margin-top:10px;
   padding:8px 10px;
   border-radius:12px;
-  background:rgba(43,92,255,.22);
-  border:1px solid rgba(43,92,255,.4);
+  background:rgba(212,175,55,.18);
+  border:1px solid rgba(212,175,55,.45);
   font-weight:700;
   letter-spacing:.4px;
+  color:var(--gold-light);
 }
 
 .hidden{display:none}
@@ -106,7 +155,7 @@ h1{margin:0 0 8px 0; font-size:22px}
   border:1px solid var(--line);
   border-radius:16px;
   padding:12px;
-  box-shadow:0 14px 40px rgba(0,0,0,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
 }
 
 .between{display:flex; justify-content:space-between; align-items:center; gap:10px}
@@ -145,7 +194,7 @@ button:disabled{opacity:.5; cursor:not-allowed}
   margin-top:10px;
   font-size:15px;
   font-weight:700;
-  color:#ffd86b;
+  color:var(--gold-light);
 }
 .statusHighlight:empty{
   display:none;
@@ -166,8 +215,8 @@ button:disabled{opacity:.5; cursor:not-allowed}
   width:0; height:0;
   border-left:12px solid transparent;
   border-right:12px solid transparent;
-  border-top:22px solid rgba(255,255,255,.90);
-  filter:drop-shadow(0 -2px 6px rgba(0,0,0,.35));
+  border-top:22px solid var(--gold);
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
 }
 
 .score{margin-top:10px; display:flex; flex-direction:column; gap:6px}
@@ -180,7 +229,7 @@ button:disabled{opacity:.5; cursor:not-allowed}
   padding:10px;
   background:var(--player-bg);
 }
-.player.active{border-color:rgba(53,255,154,.55)}
+.player.active{border-color:var(--gold); box-shadow:0 0 12px rgba(212,175,55,.3)}
 .player .tag{
   display:inline-block;
   margin-left:8px;
@@ -197,17 +246,21 @@ button:disabled{opacity:.5; cursor:not-allowed}
   display:flex;
   flex-direction:column;
   gap:4px;
-  background:#0066cc;
-  padding:8px;
+  background:linear-gradient(180deg, #1a5cb8 0%, #0d3d7a 100%);
+  padding:10px;
   border-radius:12px;
+  border:3px solid var(--gold);
+  box-shadow:0 4px 20px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
 }
 .vRow{
-  display:grid;
+  display:flex;
   gap:4px;
   justify-content:center;
 }
 .vCell{
+  width:38px;
   height:38px;
+  flex-shrink:0;
   border-radius:4px;
   display:flex;
   align-items:center;
@@ -241,14 +294,14 @@ button:disabled{opacity:.5; cursor:not-allowed}
   gap:8px;
   padding:6px 10px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255, 216, 107, .12);
+  border:2px solid var(--gold);
+  background:rgba(212,175,55,.15);
 }
 .finalCountdownLabel{
   font-size:12px;
   font-weight:900;
   letter-spacing:.5px;
-  color:rgba(255,255,255,.9);
+  color:var(--gold-light);
 }
 .finalCountdown{
   min-width:36px;
@@ -296,10 +349,11 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .modal.show{ display:flex; }
 .modalCard{
   width:min(560px, 100%);
-  background:rgba(18,26,51,.97);
-  border:1px solid var(--line);
+  background:var(--card-bg);
+  border:2px solid var(--gold);
   border-radius:16px;
   padding:14px;
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
 }
 
 /* ========== RESPONSIVE STYLES ========== */
@@ -321,8 +375,10 @@ input, textarea, select{
 /* Responsive puzzle board */
 .vannaBoard{
   max-width:100%;
+  overflow-x:auto;
 }
 .vCell{
+  width:clamp(24px, 6vw, 38px);
   height:clamp(28px, 7vw, 38px);
   font-size:clamp(12px, 3vw, 18px);
   border-radius:clamp(3px, 0.8vw, 4px);
@@ -345,6 +401,7 @@ input, textarea, select{
   .vannaBoard{gap:3px; padding:6px}
   .vRow{gap:3px}
   .vCell{
+    width:22px;
     height:24px;
     font-size:11px;
     border-radius:3px;
@@ -407,6 +464,7 @@ input, textarea, select{
   .vannaBoard{gap:4px; padding:6px}
   .vRow{gap:4px}
   .vCell{
+    width:28px;
     height:30px;
     font-size:14px;
   }
@@ -428,6 +486,7 @@ input, textarea, select{
 /* ===== Small desktop (768px - 959px) ===== */
 @media (min-width: 768px) and (max-width: 959px) {
   .vCell{
+    width:32px;
     height:34px;
     font-size:16px;
   }
@@ -594,8 +653,9 @@ input, textarea, select{
 }
 
 .authLinks a{
-  color:var(--accent);
+  color:var(--gold);
   text-decoration:none;
+  font-weight:600;
 }
 
 .authLinks a:hover{
