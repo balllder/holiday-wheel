@@ -1,0 +1,2311 @@
+{
+  "packs": [
+    {
+      "name": "Christmas",
+      "puzzles": [
+        {
+          "category": "Song",
+          "answer": "JINGLE BELLS"
+        },
+        {
+          "category": "Song",
+          "answer": "SILENT NIGHT"
+        },
+        {
+          "category": "Song",
+          "answer": "DECK THE HALLS"
+        },
+        {
+          "category": "Song",
+          "answer": "WHITE CHRISTMAS"
+        },
+        {
+          "category": "Song",
+          "answer": "FROSTY THE SNOWMAN"
+        },
+        {
+          "category": "Song",
+          "answer": "RUDOLPH THE RED NOSED REINDEER"
+        },
+        {
+          "category": "Song",
+          "answer": "HAVE YOURSELF A MERRY LITTLE CHRISTMAS"
+        },
+        {
+          "category": "Song",
+          "answer": "ROCKIN AROUND THE CHRISTMAS TREE"
+        },
+        {
+          "category": "Song",
+          "answer": "LET IT SNOW"
+        },
+        {
+          "category": "Song",
+          "answer": "WINTER WONDERLAND"
+        },
+        {
+          "category": "Song",
+          "answer": "THE TWELVE DAYS OF CHRISTMAS"
+        },
+        {
+          "category": "Song",
+          "answer": "JOY TO THE WORLD"
+        },
+        {
+          "category": "Song",
+          "answer": "SANTA CLAUS IS COMING TO TOWN"
+        },
+        {
+          "category": "Song",
+          "answer": "ALL I WANT FOR CHRISTMAS IS YOU"
+        },
+        {
+          "category": "Movie",
+          "answer": "HOME ALONE"
+        },
+        {
+          "category": "Movie",
+          "answer": "ELF"
+        },
+        {
+          "category": "Movie",
+          "answer": "A CHRISTMAS STORY"
+        },
+        {
+          "category": "Movie",
+          "answer": "THE POLAR EXPRESS"
+        },
+        {
+          "category": "Movie",
+          "answer": "HOW THE GRINCH STOLE CHRISTMAS"
+        },
+        {
+          "category": "Movie",
+          "answer": "MIRACLE ON THIRTY FOURTH STREET"
+        },
+        {
+          "category": "Movie",
+          "answer": "A CHRISTMAS CAROL"
+        },
+        {
+          "category": "Movie",
+          "answer": "ITS A WONDERFUL LIFE"
+        },
+        {
+          "category": "Movie",
+          "answer": "THE SANTA CLAUSE"
+        },
+        {
+          "category": "Movie",
+          "answer": "NATIONAL LAMPOONS CHRISTMAS VACATION"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHRISTMAS TREE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CANDY CANE"
+        },
+        {
+          "category": "Thing",
+          "answer": "GINGERBREAD HOUSE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHRISTMAS STOCKING"
+        },
+        {
+          "category": "Thing",
+          "answer": "MISTLETOE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHRISTMAS ORNAMENTS"
+        },
+        {
+          "category": "Thing",
+          "answer": "WRAPPING PAPER"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHRISTMAS LIGHTS"
+        },
+        {
+          "category": "Thing",
+          "answer": "SNOW GLOBE"
+        },
+        {
+          "category": "Thing",
+          "answer": "ADVENT CALENDAR"
+        },
+        {
+          "category": "Food",
+          "answer": "EGGNOG"
+        },
+        {
+          "category": "Food",
+          "answer": "GINGERBREAD COOKIES"
+        },
+        {
+          "category": "Food",
+          "answer": "CANDY CANES"
+        },
+        {
+          "category": "Food",
+          "answer": "HOT CHOCOLATE"
+        },
+        {
+          "category": "Food",
+          "answer": "CHRISTMAS HAM"
+        },
+        {
+          "category": "Food",
+          "answer": "SUGAR PLUMS"
+        },
+        {
+          "category": "Food",
+          "answer": "FRUITCAKE"
+        },
+        {
+          "category": "Food",
+          "answer": "ROASTED CHESTNUTS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "MERRY CHRISTMAS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY HOLIDAYS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SEASONS GREETINGS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "PEACE ON EARTH"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GOODWILL TOWARD MEN"
+        },
+        {
+          "category": "Character",
+          "answer": "SANTA CLAUS"
+        },
+        {
+          "category": "Character",
+          "answer": "RUDOLPH"
+        },
+        {
+          "category": "Character",
+          "answer": "FROSTY"
+        },
+        {
+          "category": "Character",
+          "answer": "THE GRINCH"
+        },
+        {
+          "category": "Character",
+          "answer": "SCROOGE"
+        },
+        {
+          "category": "Activity",
+          "answer": "CAROLING"
+        },
+        {
+          "category": "Activity",
+          "answer": "TRIMMING THE TREE"
+        },
+        {
+          "category": "Activity",
+          "answer": "OPENING PRESENTS"
+        }
+      ]
+    },
+    {
+      "name": "Easter",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "EASTER BUNNY"
+        },
+        {
+          "category": "Thing",
+          "answer": "EASTER EGGS"
+        },
+        {
+          "category": "Thing",
+          "answer": "EASTER BASKET"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHOCOLATE BUNNY"
+        },
+        {
+          "category": "Thing",
+          "answer": "JELLY BEANS"
+        },
+        {
+          "category": "Thing",
+          "answer": "PEEPS"
+        },
+        {
+          "category": "Thing",
+          "answer": "EASTER BONNET"
+        },
+        {
+          "category": "Thing",
+          "answer": "EASTER LILY"
+        },
+        {
+          "category": "Thing",
+          "answer": "SPRING FLOWERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "BABY CHICKS"
+        },
+        {
+          "category": "Thing",
+          "answer": "COLORED EGGS"
+        },
+        {
+          "category": "Thing",
+          "answer": "PLASTIC EGGS"
+        },
+        {
+          "category": "Thing",
+          "answer": "EASTER GRASS"
+        },
+        {
+          "category": "Thing",
+          "answer": "STUFFED BUNNY"
+        },
+        {
+          "category": "Thing",
+          "answer": "TULIPS"
+        },
+        {
+          "category": "Thing",
+          "answer": "DAFFODILS"
+        },
+        {
+          "category": "Activity",
+          "answer": "EASTER EGG HUNT"
+        },
+        {
+          "category": "Activity",
+          "answer": "DYEING EGGS"
+        },
+        {
+          "category": "Activity",
+          "answer": "EASTER PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "CHURCH SERVICE"
+        },
+        {
+          "category": "Activity",
+          "answer": "FAMILY BRUNCH"
+        },
+        {
+          "category": "Activity",
+          "answer": "EGG DECORATING"
+        },
+        {
+          "category": "Activity",
+          "answer": "ROLLING EGGS"
+        },
+        {
+          "category": "Activity",
+          "answer": "SPRING CLEANING"
+        },
+        {
+          "category": "Food",
+          "answer": "HAM"
+        },
+        {
+          "category": "Food",
+          "answer": "HOT CROSS BUNS"
+        },
+        {
+          "category": "Food",
+          "answer": "DEVILED EGGS"
+        },
+        {
+          "category": "Food",
+          "answer": "CARROT CAKE"
+        },
+        {
+          "category": "Food",
+          "answer": "LAMB"
+        },
+        {
+          "category": "Food",
+          "answer": "ASPARAGUS"
+        },
+        {
+          "category": "Food",
+          "answer": "CADBURY EGGS"
+        },
+        {
+          "category": "Food",
+          "answer": "EASTER CANDY"
+        },
+        {
+          "category": "Food",
+          "answer": "MARSHMALLOW PEEPS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY EASTER"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HE IS RISEN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SPRING HAS SPRUNG"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HOPPY EASTER"
+        },
+        {
+          "category": "Phrase",
+          "answer": "EASTER BLESSINGS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SOME BUNNY LOVES YOU"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GOOD EGG"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SPRING FEVER"
+        },
+        {
+          "category": "Thing",
+          "answer": "ROBIN"
+        },
+        {
+          "category": "Thing",
+          "answer": "BUTTERFLY"
+        },
+        {
+          "category": "Thing",
+          "answer": "LADYBUG"
+        },
+        {
+          "category": "Thing",
+          "answer": "RAINBOW"
+        },
+        {
+          "category": "Thing",
+          "answer": "SPRING RAIN"
+        },
+        {
+          "category": "Thing",
+          "answer": "GREEN GRASS"
+        },
+        {
+          "category": "Thing",
+          "answer": "BLOOMING TREES"
+        },
+        {
+          "category": "Thing",
+          "answer": "BIRDSONG"
+        },
+        {
+          "category": "Thing",
+          "answer": "SUNSHINE"
+        },
+        {
+          "category": "Thing",
+          "answer": "WARM BREEZE"
+        }
+      ]
+    },
+    {
+      "name": "Famous People",
+      "puzzles": [
+        {
+          "category": "Athlete",
+          "answer": "MICHAEL JORDAN"
+        },
+        {
+          "category": "Musician",
+          "answer": "TAYLOR SWIFT"
+        },
+        {
+          "category": "Actor",
+          "answer": "TOM HANKS"
+        },
+        {
+          "category": "Scientist",
+          "answer": "ALBERT EINSTEIN"
+        },
+        {
+          "category": "Historical Figure",
+          "answer": "ABRAHAM LINCOLN"
+        },
+        {
+          "category": "Musician",
+          "answer": "ELVIS PRESLEY"
+        },
+        {
+          "category": "Actor",
+          "answer": "MERYL STREEP"
+        },
+        {
+          "category": "Athlete",
+          "answer": "SERENA WILLIAMS"
+        }
+      ]
+    },
+    {
+      "name": "Food & Drink",
+      "puzzles": [
+        {
+          "category": "Food",
+          "answer": "PEPPERONI PIZZA"
+        },
+        {
+          "category": "Food",
+          "answer": "CHOCOLATE CHIP COOKIES"
+        },
+        {
+          "category": "Food",
+          "answer": "GRILLED CHEESE SANDWICH"
+        },
+        {
+          "category": "Drink",
+          "answer": "PUMPKIN SPICE LATTE"
+        },
+        {
+          "category": "Food",
+          "answer": "BUFFALO CHICKEN WINGS"
+        },
+        {
+          "category": "Food",
+          "answer": "MACARONI AND CHEESE"
+        },
+        {
+          "category": "Dessert",
+          "answer": "STRAWBERRY CHEESECAKE"
+        },
+        {
+          "category": "Food",
+          "answer": "BACON CHEESEBURGER"
+        }
+      ]
+    },
+    {
+      "name": "Fourth of July",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "FIREWORKS"
+        },
+        {
+          "category": "Thing",
+          "answer": "AMERICAN FLAG"
+        },
+        {
+          "category": "Thing",
+          "answer": "SPARKLERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "RED WHITE AND BLUE"
+        },
+        {
+          "category": "Thing",
+          "answer": "STARS AND STRIPES"
+        },
+        {
+          "category": "Thing",
+          "answer": "LIBERTY BELL"
+        },
+        {
+          "category": "Thing",
+          "answer": "BALD EAGLE"
+        },
+        {
+          "category": "Thing",
+          "answer": "UNCLE SAM"
+        },
+        {
+          "category": "Thing",
+          "answer": "STATUE OF LIBERTY"
+        },
+        {
+          "category": "Thing",
+          "answer": "PARADE FLOAT"
+        },
+        {
+          "category": "Food",
+          "answer": "HOT DOGS"
+        },
+        {
+          "category": "Food",
+          "answer": "HAMBURGERS"
+        },
+        {
+          "category": "Food",
+          "answer": "APPLE PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "WATERMELON"
+        },
+        {
+          "category": "Food",
+          "answer": "CORN ON THE COB"
+        },
+        {
+          "category": "Food",
+          "answer": "BARBECUE RIBS"
+        },
+        {
+          "category": "Food",
+          "answer": "POTATO SALAD"
+        },
+        {
+          "category": "Food",
+          "answer": "COLESLAW"
+        },
+        {
+          "category": "Food",
+          "answer": "BAKED BEANS"
+        },
+        {
+          "category": "Food",
+          "answer": "LEMONADE"
+        },
+        {
+          "category": "Food",
+          "answer": "ICE CREAM"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING FIREWORKS"
+        },
+        {
+          "category": "Activity",
+          "answer": "BACKYARD BARBECUE"
+        },
+        {
+          "category": "Activity",
+          "answer": "PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "POOL PARTY"
+        },
+        {
+          "category": "Activity",
+          "answer": "FAMILY REUNION"
+        },
+        {
+          "category": "Activity",
+          "answer": "PICNIC"
+        },
+        {
+          "category": "Activity",
+          "answer": "CAMPING"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY FOURTH OF JULY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "INDEPENDENCE DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LAND OF THE FREE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HOME OF THE BRAVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "UNITED WE STAND"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LIFE LIBERTY AND THE PURSUIT OF HAPPINESS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GOD BLESS AMERICA"
+        },
+        {
+          "category": "Phrase",
+          "answer": "PROUD TO BE AN AMERICAN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BORN ON THE FOURTH OF JULY"
+        },
+        {
+          "category": "Historical",
+          "answer": "DECLARATION OF INDEPENDENCE"
+        },
+        {
+          "category": "Historical",
+          "answer": "FOUNDING FATHERS"
+        },
+        {
+          "category": "Historical",
+          "answer": "GEORGE WASHINGTON"
+        },
+        {
+          "category": "Historical",
+          "answer": "THOMAS JEFFERSON"
+        },
+        {
+          "category": "Historical",
+          "answer": "BENJAMIN FRANKLIN"
+        },
+        {
+          "category": "Historical",
+          "answer": "JOHN ADAMS"
+        },
+        {
+          "category": "Historical",
+          "answer": "AMERICAN REVOLUTION"
+        },
+        {
+          "category": "Historical",
+          "answer": "THIRTEEN COLONIES"
+        },
+        {
+          "category": "Historical",
+          "answer": "CONTINENTAL CONGRESS"
+        },
+        {
+          "category": "Song",
+          "answer": "STAR SPANGLED BANNER"
+        },
+        {
+          "category": "Song",
+          "answer": "GOD BLESS AMERICA"
+        },
+        {
+          "category": "Song",
+          "answer": "AMERICA THE BEAUTIFUL"
+        },
+        {
+          "category": "Song",
+          "answer": "YANKEE DOODLE"
+        },
+        {
+          "category": "Song",
+          "answer": "THIS LAND IS YOUR LAND"
+        },
+        {
+          "category": "Song",
+          "answer": "BORN IN THE USA"
+        }
+      ]
+    },
+    {
+      "name": "Halloween",
+      "puzzles": [
+        {
+          "category": "Costume",
+          "answer": "WITCH"
+        },
+        {
+          "category": "Costume",
+          "answer": "VAMPIRE"
+        },
+        {
+          "category": "Costume",
+          "answer": "GHOST"
+        },
+        {
+          "category": "Costume",
+          "answer": "ZOMBIE"
+        },
+        {
+          "category": "Costume",
+          "answer": "WEREWOLF"
+        },
+        {
+          "category": "Costume",
+          "answer": "SKELETON"
+        },
+        {
+          "category": "Costume",
+          "answer": "MUMMY"
+        },
+        {
+          "category": "Costume",
+          "answer": "FRANKENSTEIN"
+        },
+        {
+          "category": "Costume",
+          "answer": "BLACK CAT"
+        },
+        {
+          "category": "Costume",
+          "answer": "PIRATE"
+        },
+        {
+          "category": "Costume",
+          "answer": "SUPERHERO"
+        },
+        {
+          "category": "Costume",
+          "answer": "PRINCESS"
+        },
+        {
+          "category": "Thing",
+          "answer": "JACK O LANTERN"
+        },
+        {
+          "category": "Thing",
+          "answer": "HAUNTED HOUSE"
+        },
+        {
+          "category": "Thing",
+          "answer": "COBWEBS"
+        },
+        {
+          "category": "Thing",
+          "answer": "CAULDRON"
+        },
+        {
+          "category": "Thing",
+          "answer": "BROOMSTICK"
+        },
+        {
+          "category": "Thing",
+          "answer": "TOMBSTONE"
+        },
+        {
+          "category": "Thing",
+          "answer": "TRICK OR TREAT BAG"
+        },
+        {
+          "category": "Thing",
+          "answer": "SPOOKY DECORATIONS"
+        },
+        {
+          "category": "Thing",
+          "answer": "FOG MACHINE"
+        },
+        {
+          "category": "Thing",
+          "answer": "COSTUME"
+        },
+        {
+          "category": "Candy",
+          "answer": "CANDY CORN"
+        },
+        {
+          "category": "Candy",
+          "answer": "CHOCOLATE BARS"
+        },
+        {
+          "category": "Candy",
+          "answer": "CARAMEL APPLES"
+        },
+        {
+          "category": "Candy",
+          "answer": "LOLLIPOPS"
+        },
+        {
+          "category": "Candy",
+          "answer": "GUMMY WORMS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "TRICK OR TREAT"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY HALLOWEEN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SPOOKY SEASON"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BOO"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SMELL MY FEET"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GIVE ME SOMETHING GOOD TO EAT"
+        },
+        {
+          "category": "Activity",
+          "answer": "PUMPKIN CARVING"
+        },
+        {
+          "category": "Activity",
+          "answer": "TRICK OR TREATING"
+        },
+        {
+          "category": "Activity",
+          "answer": "COSTUME PARTY"
+        },
+        {
+          "category": "Activity",
+          "answer": "BOBBING FOR APPLES"
+        },
+        {
+          "category": "Activity",
+          "answer": "HAUNTED HAYRIDE"
+        },
+        {
+          "category": "Activity",
+          "answer": "VISITING A HAUNTED HOUSE"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING SCARY MOVIES"
+        },
+        {
+          "category": "Movie",
+          "answer": "HOCUS POCUS"
+        },
+        {
+          "category": "Movie",
+          "answer": "THE NIGHTMARE BEFORE CHRISTMAS"
+        },
+        {
+          "category": "Movie",
+          "answer": "BEETLEJUICE"
+        },
+        {
+          "category": "Movie",
+          "answer": "CASPER"
+        },
+        {
+          "category": "Movie",
+          "answer": "HALLOWEENTOWN"
+        },
+        {
+          "category": "Movie",
+          "answer": "ITS THE GREAT PUMPKIN CHARLIE BROWN"
+        },
+        {
+          "category": "Movie",
+          "answer": "THE ADDAMS FAMILY"
+        },
+        {
+          "category": "Thing",
+          "answer": "FULL MOON"
+        },
+        {
+          "category": "Thing",
+          "answer": "BATS"
+        },
+        {
+          "category": "Thing",
+          "answer": "SPIDERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "OWLS"
+        },
+        {
+          "category": "Thing",
+          "answer": "RAVENS"
+        }
+      ]
+    },
+    {
+      "name": "Labor Day",
+      "puzzles": [
+        {
+          "category": "Phrase",
+          "answer": "HAPPY LABOR DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "END OF SUMMER"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LAST LONG WEEKEND"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BACK TO SCHOOL"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HONORING WORKERS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "AMERICAN WORKFORCE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HARD WORK PAYS OFF"
+        },
+        {
+          "category": "Phrase",
+          "answer": "WORKING CLASS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BLUE COLLAR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "WHITE COLLAR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "NINE TO FIVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LABOR OF LOVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "PUTTING IN THE HOURS"
+        },
+        {
+          "category": "Activity",
+          "answer": "LABOR DAY PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "BACKYARD BARBECUE"
+        },
+        {
+          "category": "Activity",
+          "answer": "FAMILY COOKOUT"
+        },
+        {
+          "category": "Activity",
+          "answer": "GOING TO THE LAKE"
+        },
+        {
+          "category": "Activity",
+          "answer": "CAMPING TRIP"
+        },
+        {
+          "category": "Activity",
+          "answer": "BEACH DAY"
+        },
+        {
+          "category": "Activity",
+          "answer": "ROAD TRIP"
+        },
+        {
+          "category": "Activity",
+          "answer": "POOL PARTY"
+        },
+        {
+          "category": "Activity",
+          "answer": "PICNIC"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING FOOTBALL"
+        },
+        {
+          "category": "Activity",
+          "answer": "SHOPPING THE SALES"
+        },
+        {
+          "category": "Activity",
+          "answer": "CLOSING UP THE CABIN"
+        },
+        {
+          "category": "Food",
+          "answer": "HAMBURGERS"
+        },
+        {
+          "category": "Food",
+          "answer": "HOT DOGS"
+        },
+        {
+          "category": "Food",
+          "answer": "BARBECUE RIBS"
+        },
+        {
+          "category": "Food",
+          "answer": "GRILLED CHICKEN"
+        },
+        {
+          "category": "Food",
+          "answer": "POTATO SALAD"
+        },
+        {
+          "category": "Food",
+          "answer": "BAKED BEANS"
+        },
+        {
+          "category": "Food",
+          "answer": "COLESLAW"
+        },
+        {
+          "category": "Food",
+          "answer": "CORN ON THE COB"
+        },
+        {
+          "category": "Food",
+          "answer": "WATERMELON"
+        },
+        {
+          "category": "Food",
+          "answer": "ICE CREAM"
+        },
+        {
+          "category": "Food",
+          "answer": "LEMONADE"
+        },
+        {
+          "category": "Food",
+          "answer": "SMORES"
+        },
+        {
+          "category": "Thing",
+          "answer": "SUMMER VACATION"
+        },
+        {
+          "category": "Thing",
+          "answer": "LONG WEEKEND"
+        },
+        {
+          "category": "Thing",
+          "answer": "THREE DAY WEEKEND"
+        },
+        {
+          "category": "Thing",
+          "answer": "UNION"
+        },
+        {
+          "category": "Thing",
+          "answer": "FAIR WAGES"
+        },
+        {
+          "category": "Thing",
+          "answer": "WORKERS RIGHTS"
+        },
+        {
+          "category": "Thing",
+          "answer": "BACK TO SCHOOL SUPPLIES"
+        },
+        {
+          "category": "Thing",
+          "answer": "FALL FASHION"
+        },
+        {
+          "category": "Thing",
+          "answer": "AUTUMN WEATHER"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHANGING LEAVES"
+        },
+        {
+          "category": "Thing",
+          "answer": "FOOTBALL SEASON"
+        },
+        {
+          "category": "Thing",
+          "answer": "COOLER TEMPERATURES"
+        },
+        {
+          "category": "Thing",
+          "answer": "SCHOOL BUS"
+        },
+        {
+          "category": "Thing",
+          "answer": "LUNCH BOX"
+        }
+      ]
+    },
+    {
+      "name": "Memorial Day",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "AMERICAN FLAG"
+        },
+        {
+          "category": "Thing",
+          "answer": "MILITARY UNIFORM"
+        },
+        {
+          "category": "Thing",
+          "answer": "DOG TAGS"
+        },
+        {
+          "category": "Thing",
+          "answer": "MEDALS"
+        },
+        {
+          "category": "Thing",
+          "answer": "PURPLE HEART"
+        },
+        {
+          "category": "Thing",
+          "answer": "VETERANS MEMORIAL"
+        },
+        {
+          "category": "Thing",
+          "answer": "ARLINGTON CEMETERY"
+        },
+        {
+          "category": "Thing",
+          "answer": "POPPY FLOWER"
+        },
+        {
+          "category": "Thing",
+          "answer": "YELLOW RIBBON"
+        },
+        {
+          "category": "Thing",
+          "answer": "TOMBSTONE"
+        },
+        {
+          "category": "Thing",
+          "answer": "TWENTY ONE GUN SALUTE"
+        },
+        {
+          "category": "Thing",
+          "answer": "BUGLE"
+        },
+        {
+          "category": "Thing",
+          "answer": "TAPS"
+        },
+        {
+          "category": "Thing",
+          "answer": "WREATH"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY MEMORIAL DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LAND OF THE FREE BECAUSE OF THE BRAVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "NEVER FORGET"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FREEDOM ISNT FREE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HONORING OUR HEROES"
+        },
+        {
+          "category": "Phrase",
+          "answer": "IN MEMORY OF"
+        },
+        {
+          "category": "Phrase",
+          "answer": "THANK YOU FOR YOUR SERVICE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FALLEN HEROES"
+        },
+        {
+          "category": "Phrase",
+          "answer": "ULTIMATE SACRIFICE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HOME OF THE BRAVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SUPPORT OUR TROOPS"
+        },
+        {
+          "category": "Activity",
+          "answer": "MEMORIAL DAY PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "VISITING CEMETERIES"
+        },
+        {
+          "category": "Activity",
+          "answer": "LAYING WREATHS"
+        },
+        {
+          "category": "Activity",
+          "answer": "MOMENT OF SILENCE"
+        },
+        {
+          "category": "Activity",
+          "answer": "FLYING THE FLAG"
+        },
+        {
+          "category": "Activity",
+          "answer": "BACKYARD BARBECUE"
+        },
+        {
+          "category": "Activity",
+          "answer": "FAMILY PICNIC"
+        },
+        {
+          "category": "Activity",
+          "answer": "GOING TO THE BEACH"
+        },
+        {
+          "category": "Food",
+          "answer": "HAMBURGERS"
+        },
+        {
+          "category": "Food",
+          "answer": "HOT DOGS"
+        },
+        {
+          "category": "Food",
+          "answer": "BARBECUE CHICKEN"
+        },
+        {
+          "category": "Food",
+          "answer": "POTATO SALAD"
+        },
+        {
+          "category": "Food",
+          "answer": "COLESLAW"
+        },
+        {
+          "category": "Food",
+          "answer": "WATERMELON"
+        },
+        {
+          "category": "Food",
+          "answer": "CORN ON THE COB"
+        },
+        {
+          "category": "Food",
+          "answer": "APPLE PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "ICE CREAM"
+        },
+        {
+          "category": "Food",
+          "answer": "LEMONADE"
+        },
+        {
+          "category": "Historical",
+          "answer": "WORLD WAR ONE"
+        },
+        {
+          "category": "Historical",
+          "answer": "WORLD WAR TWO"
+        },
+        {
+          "category": "Historical",
+          "answer": "VIETNAM WAR"
+        },
+        {
+          "category": "Historical",
+          "answer": "KOREAN WAR"
+        },
+        {
+          "category": "Historical",
+          "answer": "CIVIL WAR"
+        },
+        {
+          "category": "Thing",
+          "answer": "NATIONAL CEMETERY"
+        },
+        {
+          "category": "Thing",
+          "answer": "HONOR GUARD"
+        },
+        {
+          "category": "Thing",
+          "answer": "FLAG AT HALF STAFF"
+        }
+      ]
+    },
+    {
+      "name": "Movies & TV",
+      "puzzles": [
+        {
+          "category": "Movie Quote",
+          "answer": "HERE IS LOOKING AT YOU KID"
+        },
+        {
+          "category": "Movie Quote",
+          "answer": "MAY THE FORCE BE WITH YOU"
+        },
+        {
+          "category": "Movie Quote",
+          "answer": "YOU CANT HANDLE THE TRUTH"
+        },
+        {
+          "category": "TV Show",
+          "answer": "STRANGER THINGS"
+        },
+        {
+          "category": "TV Show",
+          "answer": "BREAKING BAD"
+        },
+        {
+          "category": "TV Show",
+          "answer": "THE OFFICE"
+        },
+        {
+          "category": "Movie Title",
+          "answer": "THE SHAWSHANK REDEMPTION"
+        },
+        {
+          "category": "Movie Title",
+          "answer": "PULP FICTION"
+        },
+        {
+          "category": "Movie Title",
+          "answer": "THE DARK KNIGHT"
+        },
+        {
+          "category": "Movie Title",
+          "answer": "FORREST GUMP"
+        }
+      ]
+    },
+    {
+      "name": "New Years",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "BALL DROP"
+        },
+        {
+          "category": "Thing",
+          "answer": "TIMES SQUARE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHAMPAGNE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CONFETTI"
+        },
+        {
+          "category": "Thing",
+          "answer": "PARTY HATS"
+        },
+        {
+          "category": "Thing",
+          "answer": "NOISEMAKERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "FIREWORKS"
+        },
+        {
+          "category": "Thing",
+          "answer": "MIDNIGHT KISS"
+        },
+        {
+          "category": "Thing",
+          "answer": "COUNTDOWN"
+        },
+        {
+          "category": "Thing",
+          "answer": "STREAMERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "GLITTER"
+        },
+        {
+          "category": "Thing",
+          "answer": "PARTY POPPERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "NEW YEARS EVE PARTY"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHAMPAGNE TOAST"
+        },
+        {
+          "category": "Thing",
+          "answer": "TUXEDO"
+        },
+        {
+          "category": "Thing",
+          "answer": "EVENING GOWN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY NEW YEAR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "NEW YEARS RESOLUTION"
+        },
+        {
+          "category": "Phrase",
+          "answer": "RING IN THE NEW YEAR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "OUT WITH THE OLD IN WITH THE NEW"
+        },
+        {
+          "category": "Phrase",
+          "answer": "AULD LANG SYNE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "CHEERS TO THE NEW YEAR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "MIDNIGHT COUNTDOWN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "NEW BEGINNINGS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FRESH START"
+        },
+        {
+          "category": "Phrase",
+          "answer": "TURN OVER A NEW LEAF"
+        },
+        {
+          "category": "Phrase",
+          "answer": "THE YEAR AHEAD"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BEST WISHES"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING THE BALL DROP"
+        },
+        {
+          "category": "Activity",
+          "answer": "MAKING RESOLUTIONS"
+        },
+        {
+          "category": "Activity",
+          "answer": "THROWING A PARTY"
+        },
+        {
+          "category": "Activity",
+          "answer": "TOASTING AT MIDNIGHT"
+        },
+        {
+          "category": "Activity",
+          "answer": "STAYING UP LATE"
+        },
+        {
+          "category": "Activity",
+          "answer": "DANCING THE NIGHT AWAY"
+        },
+        {
+          "category": "Activity",
+          "answer": "SINGING AULD LANG SYNE"
+        },
+        {
+          "category": "Activity",
+          "answer": "NEW YEARS DAY BRUNCH"
+        },
+        {
+          "category": "Food",
+          "answer": "CHAMPAGNE"
+        },
+        {
+          "category": "Food",
+          "answer": "APPETIZERS"
+        },
+        {
+          "category": "Food",
+          "answer": "BLACK EYED PEAS"
+        },
+        {
+          "category": "Food",
+          "answer": "PORK AND SAUERKRAUT"
+        },
+        {
+          "category": "Food",
+          "answer": "SHRIMP COCKTAIL"
+        },
+        {
+          "category": "Food",
+          "answer": "CHEESE PLATTER"
+        },
+        {
+          "category": "Song",
+          "answer": "AULD LANG SYNE"
+        },
+        {
+          "category": "Song",
+          "answer": "NEW YEARS DAY"
+        },
+        {
+          "category": "Song",
+          "answer": "CELEBRATION"
+        },
+        {
+          "category": "Song",
+          "answer": "LETS GET IT STARTED"
+        },
+        {
+          "category": "Thing",
+          "answer": "CALENDAR"
+        },
+        {
+          "category": "Thing",
+          "answer": "RESOLUTIONS LIST"
+        },
+        {
+          "category": "Thing",
+          "answer": "YEAR IN REVIEW"
+        },
+        {
+          "category": "Thing",
+          "answer": "PHOTO BOOTH"
+        },
+        {
+          "category": "Thing",
+          "answer": "DISCO BALL"
+        }
+      ]
+    },
+    {
+      "name": "Phrases & Sayings",
+      "puzzles": [
+        {
+          "category": "Phrase",
+          "answer": "BREAK A LEG"
+        },
+        {
+          "category": "Phrase",
+          "answer": "PIECE OF CAKE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "ONCE IN A BLUE MOON"
+        },
+        {
+          "category": "Phrase",
+          "answer": "COST AN ARM AND A LEG"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BITE THE BULLET"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HIT THE NAIL ON THE HEAD"
+        },
+        {
+          "category": "Phrase",
+          "answer": "UNDER THE WEATHER"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BEST OF BOTH WORLDS"
+        }
+      ]
+    },
+    {
+      "name": "Places",
+      "puzzles": [
+        {
+          "category": "Landmark",
+          "answer": "STATUE OF LIBERTY"
+        },
+        {
+          "category": "City",
+          "answer": "SAN FRANCISCO"
+        },
+        {
+          "category": "Country",
+          "answer": "NEW ZEALAND"
+        },
+        {
+          "category": "Landmark",
+          "answer": "GRAND CANYON"
+        },
+        {
+          "category": "City",
+          "answer": "LOS ANGELES"
+        },
+        {
+          "category": "Landmark",
+          "answer": "EIFFEL TOWER"
+        },
+        {
+          "category": "City",
+          "answer": "NEW YORK CITY"
+        },
+        {
+          "category": "Country",
+          "answer": "UNITED KINGDOM"
+        }
+      ]
+    },
+    {
+      "name": "St Patricks Day",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "SHAMROCK"
+        },
+        {
+          "category": "Thing",
+          "answer": "FOUR LEAF CLOVER"
+        },
+        {
+          "category": "Thing",
+          "answer": "LEPRECHAUN"
+        },
+        {
+          "category": "Thing",
+          "answer": "POT OF GOLD"
+        },
+        {
+          "category": "Thing",
+          "answer": "RAINBOW"
+        },
+        {
+          "category": "Thing",
+          "answer": "GREEN BEER"
+        },
+        {
+          "category": "Thing",
+          "answer": "LEPRECHAUN HAT"
+        },
+        {
+          "category": "Thing",
+          "answer": "SHILLELAGH"
+        },
+        {
+          "category": "Thing",
+          "answer": "IRISH FLAG"
+        },
+        {
+          "category": "Thing",
+          "answer": "GOLD COINS"
+        },
+        {
+          "category": "Thing",
+          "answer": "LUCKY CHARM"
+        },
+        {
+          "category": "Thing",
+          "answer": "HORSESHOE"
+        },
+        {
+          "category": "Thing",
+          "answer": "GREEN CLOTHING"
+        },
+        {
+          "category": "Thing",
+          "answer": "CELTIC CROSS"
+        },
+        {
+          "category": "Thing",
+          "answer": "HARP"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY ST PATRICKS DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LUCK OF THE IRISH"
+        },
+        {
+          "category": "Phrase",
+          "answer": "KISS ME IM IRISH"
+        },
+        {
+          "category": "Phrase",
+          "answer": "ERIN GO BRAGH"
+        },
+        {
+          "category": "Phrase",
+          "answer": "TOP OF THE MORNING"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FEELING LUCKY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "WEARING OF THE GREEN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LUCK BE WITH YOU"
+        },
+        {
+          "category": "Phrase",
+          "answer": "MAY THE ROAD RISE TO MEET YOU"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SAINTS AND SCHOLARS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GREEN WITH ENVY"
+        },
+        {
+          "category": "Food",
+          "answer": "CORNED BEEF AND CABBAGE"
+        },
+        {
+          "category": "Food",
+          "answer": "IRISH SODA BREAD"
+        },
+        {
+          "category": "Food",
+          "answer": "SHEPHERDS PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "COLCANNON"
+        },
+        {
+          "category": "Food",
+          "answer": "IRISH STEW"
+        },
+        {
+          "category": "Food",
+          "answer": "BANGERS AND MASH"
+        },
+        {
+          "category": "Food",
+          "answer": "FISH AND CHIPS"
+        },
+        {
+          "category": "Food",
+          "answer": "BOXTY"
+        },
+        {
+          "category": "Food",
+          "answer": "IRISH COFFEE"
+        },
+        {
+          "category": "Food",
+          "answer": "GUINNESS"
+        },
+        {
+          "category": "Food",
+          "answer": "IRISH CREAM"
+        },
+        {
+          "category": "Activity",
+          "answer": "ST PATRICKS DAY PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "WEARING GREEN"
+        },
+        {
+          "category": "Activity",
+          "answer": "SEARCHING FOR FOUR LEAF CLOVERS"
+        },
+        {
+          "category": "Activity",
+          "answer": "IRISH DANCING"
+        },
+        {
+          "category": "Activity",
+          "answer": "PUB CRAWL"
+        },
+        {
+          "category": "Place",
+          "answer": "IRELAND"
+        },
+        {
+          "category": "Place",
+          "answer": "DUBLIN"
+        },
+        {
+          "category": "Place",
+          "answer": "BLARNEY STONE"
+        },
+        {
+          "category": "Thing",
+          "answer": "BAGPIPES"
+        },
+        {
+          "category": "Thing",
+          "answer": "CELTIC KNOT"
+        },
+        {
+          "category": "Thing",
+          "answer": "IRISH SETTER"
+        },
+        {
+          "category": "Thing",
+          "answer": "EMERALD ISLE"
+        },
+        {
+          "category": "Song",
+          "answer": "DANNY BOY"
+        },
+        {
+          "category": "Song",
+          "answer": "WHEN IRISH EYES ARE SMILING"
+        }
+      ]
+    },
+    {
+      "name": "Thanksgiving",
+      "puzzles": [
+        {
+          "category": "Food",
+          "answer": "ROASTED TURKEY"
+        },
+        {
+          "category": "Food",
+          "answer": "MASHED POTATOES"
+        },
+        {
+          "category": "Food",
+          "answer": "CRANBERRY SAUCE"
+        },
+        {
+          "category": "Food",
+          "answer": "PUMPKIN PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "STUFFING"
+        },
+        {
+          "category": "Food",
+          "answer": "GRAVY"
+        },
+        {
+          "category": "Food",
+          "answer": "GREEN BEAN CASSEROLE"
+        },
+        {
+          "category": "Food",
+          "answer": "SWEET POTATO CASSEROLE"
+        },
+        {
+          "category": "Food",
+          "answer": "CORNBREAD"
+        },
+        {
+          "category": "Food",
+          "answer": "APPLE PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "PECAN PIE"
+        },
+        {
+          "category": "Food",
+          "answer": "DINNER ROLLS"
+        },
+        {
+          "category": "Food",
+          "answer": "BUTTERNUT SQUASH"
+        },
+        {
+          "category": "Food",
+          "answer": "CORN ON THE COB"
+        },
+        {
+          "category": "Food",
+          "answer": "MACARONI AND CHEESE"
+        },
+        {
+          "category": "Thing",
+          "answer": "CORNUCOPIA"
+        },
+        {
+          "category": "Thing",
+          "answer": "THANKSGIVING TABLE"
+        },
+        {
+          "category": "Thing",
+          "answer": "AUTUMN LEAVES"
+        },
+        {
+          "category": "Thing",
+          "answer": "TURKEY PLATTER"
+        },
+        {
+          "category": "Thing",
+          "answer": "HARVEST DECORATIONS"
+        },
+        {
+          "category": "Thing",
+          "answer": "PILGRIM HAT"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY THANKSGIVING"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GIVE THANKS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GOBBLE GOBBLE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "THANKFUL AND BLESSED"
+        },
+        {
+          "category": "Phrase",
+          "answer": "COUNT YOUR BLESSINGS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "GRATEFUL HEART"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FAMILY GATHERING"
+        },
+        {
+          "category": "Phrase",
+          "answer": "THANKSGIVING FEAST"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HARVEST CELEBRATION"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FALL FESTIVAL"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING FOOTBALL"
+        },
+        {
+          "category": "Activity",
+          "answer": "THANKSGIVING PARADE"
+        },
+        {
+          "category": "Activity",
+          "answer": "BLACK FRIDAY SHOPPING"
+        },
+        {
+          "category": "Activity",
+          "answer": "SAYING GRACE"
+        },
+        {
+          "category": "Activity",
+          "answer": "CARVING THE TURKEY"
+        },
+        {
+          "category": "Activity",
+          "answer": "GOING AROUND THE TABLE"
+        },
+        {
+          "category": "Event",
+          "answer": "MACYS THANKSGIVING DAY PARADE"
+        },
+        {
+          "category": "Historical",
+          "answer": "PLYMOUTH ROCK"
+        },
+        {
+          "category": "Historical",
+          "answer": "MAYFLOWER"
+        },
+        {
+          "category": "Historical",
+          "answer": "PILGRIMS"
+        },
+        {
+          "category": "Historical",
+          "answer": "NATIVE AMERICANS"
+        },
+        {
+          "category": "Historical",
+          "answer": "FIRST THANKSGIVING"
+        },
+        {
+          "category": "Thing",
+          "answer": "FALL HARVEST"
+        },
+        {
+          "category": "Thing",
+          "answer": "PUMPKINS"
+        },
+        {
+          "category": "Thing",
+          "answer": "GOURDS"
+        },
+        {
+          "category": "Thing",
+          "answer": "INDIAN CORN"
+        },
+        {
+          "category": "Thing",
+          "answer": "HAY BALES"
+        },
+        {
+          "category": "Thing",
+          "answer": "SCARECROW"
+        },
+        {
+          "category": "Phrase",
+          "answer": "TURKEY DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "FOOD COMA"
+        }
+      ]
+    },
+    {
+      "name": "Valentines Day",
+      "puzzles": [
+        {
+          "category": "Thing",
+          "answer": "RED ROSES"
+        },
+        {
+          "category": "Thing",
+          "answer": "HEART SHAPED BOX"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHOCOLATES"
+        },
+        {
+          "category": "Thing",
+          "answer": "LOVE LETTER"
+        },
+        {
+          "category": "Thing",
+          "answer": "CUPID"
+        },
+        {
+          "category": "Thing",
+          "answer": "HEART"
+        },
+        {
+          "category": "Thing",
+          "answer": "VALENTINES CARD"
+        },
+        {
+          "category": "Thing",
+          "answer": "CANDY HEARTS"
+        },
+        {
+          "category": "Thing",
+          "answer": "TEDDY BEAR"
+        },
+        {
+          "category": "Thing",
+          "answer": "DIAMOND RING"
+        },
+        {
+          "category": "Thing",
+          "answer": "RED BALLOONS"
+        },
+        {
+          "category": "Thing",
+          "answer": "LOVE SONGS"
+        },
+        {
+          "category": "Thing",
+          "answer": "BOUQUET OF FLOWERS"
+        },
+        {
+          "category": "Thing",
+          "answer": "CHAMPAGNE"
+        },
+        {
+          "category": "Thing",
+          "answer": "ROMANTIC DINNER"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HAPPY VALENTINES DAY"
+        },
+        {
+          "category": "Phrase",
+          "answer": "BE MINE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "I LOVE YOU"
+        },
+        {
+          "category": "Phrase",
+          "answer": "TRUE LOVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LOVE IS IN THE AIR"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HUGS AND KISSES"
+        },
+        {
+          "category": "Phrase",
+          "answer": "SWEETHEARTS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LOVE AT FIRST SIGHT"
+        },
+        {
+          "category": "Phrase",
+          "answer": "HEAD OVER HEELS"
+        },
+        {
+          "category": "Phrase",
+          "answer": "MATCH MADE IN HEAVEN"
+        },
+        {
+          "category": "Phrase",
+          "answer": "XOXO"
+        },
+        {
+          "category": "Phrase",
+          "answer": "MY FUNNY VALENTINE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "CRAZY IN LOVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "PUPPY LOVE"
+        },
+        {
+          "category": "Phrase",
+          "answer": "LOVEBIRDS"
+        },
+        {
+          "category": "Activity",
+          "answer": "ROMANTIC GETAWAY"
+        },
+        {
+          "category": "Activity",
+          "answer": "CANDLELIT DINNER"
+        },
+        {
+          "category": "Activity",
+          "answer": "EXCHANGING GIFTS"
+        },
+        {
+          "category": "Activity",
+          "answer": "DANCING"
+        },
+        {
+          "category": "Activity",
+          "answer": "WATCHING A ROMANTIC MOVIE"
+        },
+        {
+          "category": "Activity",
+          "answer": "COUPLES MASSAGE"
+        },
+        {
+          "category": "Food",
+          "answer": "CHOCOLATE COVERED STRAWBERRIES"
+        },
+        {
+          "category": "Food",
+          "answer": "HEART SHAPED PIZZA"
+        },
+        {
+          "category": "Food",
+          "answer": "RED VELVET CAKE"
+        },
+        {
+          "category": "Food",
+          "answer": "CONVERSATION HEARTS"
+        },
+        {
+          "category": "Food",
+          "answer": "CHOCOLATE TRUFFLES"
+        },
+        {
+          "category": "Song",
+          "answer": "MY HEART WILL GO ON"
+        },
+        {
+          "category": "Song",
+          "answer": "I WILL ALWAYS LOVE YOU"
+        },
+        {
+          "category": "Song",
+          "answer": "UNCHAINED MELODY"
+        },
+        {
+          "category": "Song",
+          "answer": "CANT HELP FALLING IN LOVE"
+        },
+        {
+          "category": "Song",
+          "answer": "ENDLESS LOVE"
+        },
+        {
+          "category": "Song",
+          "answer": "AT LAST"
+        },
+        {
+          "category": "Movie",
+          "answer": "THE NOTEBOOK"
+        },
+        {
+          "category": "Movie",
+          "answer": "TITANIC"
+        },
+        {
+          "category": "Movie",
+          "answer": "PRETTY WOMAN"
+        },
+        {
+          "category": "Movie",
+          "answer": "WHEN HARRY MET SALLY"
+        }
+      ]
+    }
+  ]
+}
