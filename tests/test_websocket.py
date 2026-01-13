@@ -1557,3 +1557,145 @@ class TestSolveInTossup:
         toast_events = [r for r in received if r["name"] == "toast"]
         assert len(toast_events) >= 1
         client.disconnect()
+
+
+class TestRevealAll:
+    """Tests for reveal_all handler (TV display feature)."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+        self.flask_client = app.test_client()
+        create_test_user_session(self.flask_client, "RevealHost")
+        self.client = socketio.test_client(app, flask_test_client=self.flask_client)
+        self.client.emit("join", {"room": "reveal_test"})
+        self.client.get_received()
+        self.client.emit("claim_host", {"room": "reveal_test", "code": "testcode"})
+        self.client.get_received()
+
+    def teardown_method(self):
+        if self.client.is_connected():
+            self.client.disconnect()
+
+    def test_reveal_all_as_host(self):
+        """Test revealing all letters as host."""
+        game = GAMES["reveal_test"]
+        game.set_puzzle(1, "Test", "HELLO WORLD")
+        game.revealed = set()
+
+        self.client.emit("reveal_all", {"room": "reveal_test"})
+        received = self.client.get_received()
+
+        # All letters should be revealed
+        assert "H" in game.revealed
+        assert "E" in game.revealed
+        assert "L" in game.revealed
+        assert "O" in game.revealed
+        assert "W" in game.revealed
+        assert "R" in game.revealed
+        assert "D" in game.revealed
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("revealed" in str(t["args"]).lower() for t in toast_events)
+
+    def test_reveal_all_not_host(self):
+        """Test reveal_all without being host."""
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "NotHost")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "reveal_test"})
+        client2.get_received()
+
+        game = GAMES["reveal_test"]
+        game.set_puzzle(1, "Test", "HELLO")
+        game.revealed = set()
+
+        client2.emit("reveal_all", {"room": "reveal_test"})
+        received = client2.get_received()
+
+        # Should not reveal letters
+        assert len(game.revealed) == 0
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("host" in str(t["args"]).lower() for t in toast_events)
+        client2.disconnect()
+
+
+class TestSpinAsHost:
+    """Tests for host spinning on behalf of active player (TV display feature)."""
+
+    def setup_method(self):
+        GAMES.clear()
+        app.config["TESTING"] = True
+
+    def test_spin_as_host_for_player(self):
+        """Test host can spin on behalf of active player."""
+        # Create a player
+        flask_client1 = app.test_client()
+        create_test_user_session(flask_client1, "Player1")
+        client1 = socketio.test_client(app, flask_test_client=flask_client1)
+        client1.emit("join", {"room": "spin_host_test"})
+        client1.get_received()
+        client1.emit("join_game", {"room": "spin_host_test"})
+        client1.get_received()
+
+        # Create host (different client)
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "HostUser")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "spin_host_test"})
+        client2.get_received()
+        client2.emit("claim_host", {"room": "spin_host_test", "code": "testcode"})
+        client2.get_received()
+
+        game = GAMES["spin_host_test"]
+        game.set_puzzle(1, "Test", "HELLO")
+        initial_last_spin = game.last_spin_index
+
+        # Host spins (not the active player)
+        client2.emit("spin", {"room": "spin_host_test"})
+        received = client2.get_received()
+
+        # Spin should work for host - last_spin_index should change
+        # Note: wheel_index may be None if spin landed on BANKRUPT/LOSE A TURN
+        assert game.last_spin_index is not None
+        # Check that state was broadcast
+        state_events = [r for r in received if r["name"] == "state"]
+        assert len(state_events) >= 1
+
+        client1.disconnect()
+        client2.disconnect()
+
+    def test_spin_as_non_host_non_active(self):
+        """Test non-host, non-active player cannot spin."""
+        # Create first player (active)
+        flask_client1 = app.test_client()
+        create_test_user_session(flask_client1, "ActivePlayer")
+        client1 = socketio.test_client(app, flask_test_client=flask_client1)
+        client1.emit("join", {"room": "spin_nonhost_test"})
+        client1.get_received()
+        client1.emit("join_game", {"room": "spin_nonhost_test"})
+        client1.get_received()
+
+        # Create second player (not active, not host)
+        flask_client2 = app.test_client()
+        create_test_user_session(flask_client2, "OtherPlayer")
+        client2 = socketio.test_client(app, flask_test_client=flask_client2)
+        client2.emit("join", {"room": "spin_nonhost_test"})
+        client2.get_received()
+        client2.emit("join_game", {"room": "spin_nonhost_test"})
+        client2.get_received()
+
+        game = GAMES["spin_nonhost_test"]
+        game.set_puzzle(1, "Test", "HELLO")
+        game.active_idx = 0  # First player is active
+
+        # Second player tries to spin (should fail)
+        client2.emit("spin", {"room": "spin_nonhost_test"})
+        received = client2.get_received()
+
+        toast_events = [r for r in received if r["name"] == "toast"]
+        assert any("active player" in str(t["args"]).lower() for t in toast_events)
+
+        client1.disconnect()
+        client2.disconnect()

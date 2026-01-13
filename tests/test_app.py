@@ -562,6 +562,22 @@ class TestFlaskApp:
             assert "/auth/login" in response.headers.get("Location", "")
 
 
+class TestTvDisplayRoute:
+    def test_tv_route_requires_login(self):
+        with app.test_client() as client:
+            response = client.get("/tv/main")
+            # Should redirect to login when not authenticated
+            assert response.status_code == 302
+            assert "/auth/login" in response.headers.get("Location", "")
+
+    def test_tv_route_with_custom_room_requires_login(self):
+        with app.test_client() as client:
+            response = client.get("/tv/customroom")
+            # Should redirect to login when not authenticated
+            assert response.status_code == 302
+            assert "/auth/login" in response.headers.get("Location", "")
+
+
 class TestGetGameAndSerialize:
     def test_get_game_creates_new(self):
         GAMES.pop("new_game_test", None)
