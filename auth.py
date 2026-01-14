@@ -116,6 +116,80 @@ def login():
     return response
 
 
+@auth_bp.route("/api/login", methods=["POST"])
+def api_login():
+    """API login endpoint for mobile apps. Returns a token for authentication."""
+    data = request.get_json() if request.is_json else {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not email or not password:
+        return jsonify({"ok": False, "error": "Email and password are required"}), 400
+
+    user = db_get_user_by_email(email)
+
+    if not user or not check_password_hash(user["password_hash"], password):
+        return jsonify({"ok": False, "error": "Invalid email or password"}), 401
+
+    if not user["verified"]:
+        return jsonify({"ok": False, "error": "Please verify your email before logging in"}), 403
+
+    # Generate a token for the mobile app
+    token = secrets.token_urlsafe(32)
+    db_set_remember_token(user["id"], token)
+    db_update_last_login(user["id"])
+
+    return jsonify({
+        "ok": True,
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "display_name": user["display_name"],
+        },
+    })
+
+
+@auth_bp.route("/api/verify", methods=["GET"])
+def api_verify_token():
+    """Verify an API token is still valid."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"ok": False, "error": "No token provided"}), 401
+
+    token = auth_header[7:]  # Remove "Bearer " prefix
+    user = db_get_user_by_remember_token(token)
+
+    if not user:
+        return jsonify({"ok": False, "error": "Invalid token"}), 401
+
+    return jsonify({
+        "ok": True,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "display_name": user["display_name"],
+        },
+    })
+
+
+@auth_bp.route("/api/rooms", methods=["GET"])
+def api_rooms():
+    """Get list of active rooms (requires token auth)."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"ok": False, "error": "No token provided"}), 401
+
+    token = auth_header[7:]
+    user = db_get_user_by_remember_token(token)
+
+    if not user:
+        return jsonify({"ok": False, "error": "Invalid token"}), 401
+
+    rooms = db_list_active_rooms()
+    return jsonify({"ok": True, "rooms": rooms})
+
+
 # Minimum score for reCAPTCHA v3 (0.0 = bot, 1.0 = human)
 RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
 
