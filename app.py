@@ -11,7 +11,7 @@ from flask import Flask, jsonify, render_template, request, session
 from flask_socketio import SocketIO, emit, join_room
 
 from auth import auth_bp, get_current_user, login_required
-from db_auth import db_get_user_by_id, db_init_auth, db_update_room_activity
+from db_auth import db_get_user_by_id, db_get_user_by_remember_token, db_init_auth, db_update_room_activity
 
 
 # Type helper: Flask-SocketIO adds 'sid' attribute to request at runtime
@@ -724,6 +724,7 @@ def serialize(g: GameState) -> dict:
         "current_wedge": g.current_wedge,
         "wheel_index": g.wheel_index,
         "wheel_slots": g.wheel_slots,
+        "last_spin_index": g.last_spin_index,
         "host": {"claimed": g.host_sid is not None},
         "db": counts,
         "packs": packs,
@@ -829,6 +830,17 @@ def start_final_timer_loop(room: str):
             get_game(room).final_timer_task_running = False
 
     socketio.start_background_task(loop)
+
+
+@socketio.on("connect")
+def on_connect(auth=None):
+    """Handle socket connection with optional token auth."""
+    if auth and isinstance(auth, dict) and "token" in auth:
+        token = auth["token"]
+        user = db_get_user_by_remember_token(token)
+        if user:
+            session["user_id"] = user["id"]
+            session["display_name"] = user["display_name"]
 
 
 @socketio.on("join")
